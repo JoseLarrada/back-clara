@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Demo SSE Ticker Empleado</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    .ok { color: #0b7a0b; }
+    .warn { color: #b26a00; }
+    .err { color: #b00020; }
+    pre { background: #f5f5f5; padding: 12px; border-radius: 8px; overflow: auto; }
+    button { margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Demo ticker SSE (RF19)</h1>
+  <p>Esta demo consume <code>/api/v1/empleado/panel/ticker</code> con reconexion automatica.</p>
+
+  <div>
+    <button id="btnStart">Iniciar</button>
+    <button id="btnStop">Detener</button>
+  </div>
+
+  <p id="status" class="warn">Estado: desconectado</p>
+  <pre id="payload">Esperando datos...</pre>
+
+  <script src="/sse-ticker-client.js"></script>
+  <script>
+    var statusEl = document.getElementById("status");
+    var payloadEl = document.getElementById("payload");
+    var client = null;
+
+    function setStatus(text, cls) {
+      statusEl.textContent = "Estado: " + text;
+      statusEl.className = cls;
+    }
+
+    function buildUrl() {
+      return "/api/v1/empleado/panel/ticker?intervaloMs=1000&duracionSegundos=300";
+    }
+
+    function initClient() {
+      client = createTickerSseClient({
+        url: buildUrl(),
+        withCredentials: true,
+        onOpen: function () {
+          setStatus("conectado", "ok");
+        },
+        onEstadoPanel: function (data) {
+          setStatus("recibiendo datos", "ok");
+          payloadEl.textContent = JSON.stringify(data, null, 2);
+        },
+        onReconnectScheduled: function (ctx) {
+          setStatus("reconectando en " + ctx.waitMs + " ms (intento " + ctx.attempt + ")", "warn");
+        },
+        onError: function () {
+          setStatus("error de conexion, se intentara reconectar", "err");
+        },
+        onClose: function () {
+          setStatus("detenido", "warn");
+        }
+      });
+    }
+
+    document.getElementById("btnStart").addEventListener("click", function () {
+      if (!client) {
+        initClient();
+      }
+      client.start();
+    });
+
+    document.getElementById("btnStop").addEventListener("click", function () {
+      if (client) {
+        client.stop();
+      }
+    });
+  </script>
+</body>
+</html>
+
