@@ -9,13 +9,18 @@ import java.util.UUID;
 @Component
 public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver<UUID> {
 
+    private static final UUID SYSTEM_DEFAULT_TENANT = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
     @Override
     public UUID resolveCurrentTenantIdentifier() {
         // Retorna el UUID directo del hilo HTTP (Capturado por tu JwtFilter)
         UUID currentTenant = TenantContext.getCurrentTenant();
 
-        // Si no hay sesión (ej: endpoint /auth/login), devolvemos null
-        // para que Hibernate sepa que es una consulta global no filtrada
+        // Si no hay sesión (ej: arranque del sistema), devolvemos un default tenant
+        // inofensivo para evitar excepciones de inicialización de Hibernate
+        if (currentTenant == null) {
+            return SYSTEM_DEFAULT_TENANT;
+        }
         return currentTenant;
     }
 

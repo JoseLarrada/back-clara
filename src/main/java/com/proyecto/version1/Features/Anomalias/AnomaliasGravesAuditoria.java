@@ -1,11 +1,14 @@
 package com.proyecto.version1.Features.Anomalias;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.proyecto.version1.Features.Empleados.Empleado;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import org.hibernate.annotations.TenantId;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -19,9 +22,19 @@ import java.util.UUID;
 @Table(name = "anomalias_graves_auditoria")
 public class AnomaliasGravesAuditoria {
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @ColumnDefault("uuid_generate_v4()")
     @Column(name = "id", nullable = false)
     private UUID id;
+
+    @TenantId
+    @Column(name = "empresa_id", nullable = false)
+    private UUID empresaId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "empleado_id", nullable = false)
+    private Empleado empleado;
 
     @Column(name = "tipo_anomalia", nullable = false, length = 50)
     private String tipoAnomalia;
@@ -31,10 +44,10 @@ public class AnomaliasGravesAuditoria {
 
     @ColumnDefault("false")
     @Column(name = "notificado_via_sns", nullable = false)
+    @Builder.Default
     private Boolean notificadoViaSns = false;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
+    @CreationTimestamp
     @Column(name = "creado_en")
     private OffsetDateTime creadoEn;
-
 }

@@ -19,6 +19,10 @@ import com.proyecto.version1.Features.ReglasHorario.ReglaHorarioRepository;
 import com.proyecto.version1.Features.RegistrosAsistencias.RegistroAsistencia;
 import com.proyecto.version1.Features.RegistrosAsistencias.repository.RegistroAsistenciaRepository;
 import com.proyecto.version1.security.TenantContext;
+import com.proyecto.version1.Features.Anomalias.service.AlertaService;
+import com.proyecto.version1.Features.GeocercasRemota.repository.GeocercasRemotaRepository;
+import com.proyecto.version1.Features.Geolocalizacion.GeoUtils;
+import com.proyecto.version1.Features.RegistrosAsistencias.service.QrValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -57,6 +61,9 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
     private final RegistroAsistenciaRepository registroAsistenciaRepository;
     private final ReglaHorarioRepository reglaHorarioRepository;
     private final CalendarioHibridoRepository calendarioHibridoRepository;
+    private final AlertaService alertaService;
+    private final QrValidationService qrValidationService;
+    private final GeocercasRemotaRepository geocercasRemotaRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -129,7 +136,7 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
         ReglaHorario regla = obtenerRegla(tenantId);
         Optional<RegistroAsistencia> registroHoy = registroHoy(tenantId, empleado.getId(), hoy);
 
-        validarOrigenVsModalidad(request.origenMarcacion(), modalidadAplicableHoy, request.tokenQr(), request.esFacialVerificado(), request.precisionGpsAccuracy());
+        validarMarcacionSeguridad(request, empleado, tenantId, modalidadAplicableHoy);
 
         if (request.tipoMarcacion() == TipoMarcacionAsistencia.ENTRADA) {
             if (registroHoy.isPresent()) {
@@ -151,6 +158,11 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
                     .esFacialVerificado(Boolean.TRUE.equals(request.esFacialVerificado()))
                     .precisionGpsAccuracy(request.precisionGpsAccuracy())
                     .tokenQrUtilizado(tokenQrAUsar(request.origenMarcacion(), request.tokenQr()))
+                    .latitud(request.latitud())
+                    .longitud(request.longitud())
+                    .esMockLocation(Boolean.TRUE.equals(request.esMockLocation()))
+                    .fotoCapturaUrl(request.fotoCapturaUrl())
+                    .scoreFacialCoincidencia(request.scoreFacialCoincidencia() != null ? BigDecimal.valueOf(request.scoreFacialCoincidencia()) : null)
                     .build();
 
             RegistroAsistencia saved = registroAsistenciaRepository.save(nuevo);
@@ -170,6 +182,11 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
                     saved.getEsFacialVerificado(),
                     saved.getPrecisionGpsAccuracy(),
                     saved.getTokenQrUtilizado(),
+                    saved.getLatitud(),
+                    saved.getLongitud(),
+                    saved.getEsMockLocation(),
+                    saved.getFotoCapturaUrl(),
+                    saved.getScoreFacialCoincidencia() != null ? saved.getScoreFacialCoincidencia().doubleValue() : null,
                     request.tipoMarcacion(),
                     request.origenMarcacion(),
                     "Entrada registrada correctamente"
@@ -209,6 +226,13 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
             if (request.tokenQr() != null && !request.tokenQr().isBlank()) {
                 existente.setTokenQrUtilizado(request.tokenQr());
             }
+            if (request.latitud() != null) existente.setLatitud(request.latitud());
+            if (request.longitud() != null) existente.setLongitud(request.longitud());
+            if (request.esMockLocation() != null) existente.setEsMockLocation(request.esMockLocation());
+            if (request.fotoCapturaUrl() != null) existente.setFotoCapturaUrl(request.fotoCapturaUrl());
+            if (request.scoreFacialCoincidencia() != null) {
+                existente.setScoreFacialCoincidencia(BigDecimal.valueOf(request.scoreFacialCoincidencia()));
+            }
 
             RegistroAsistencia saved = registroAsistenciaRepository.save(existente);
             return new RegistroAsistenciaResponse(
@@ -227,6 +251,11 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
                     saved.getEsFacialVerificado(),
                     saved.getPrecisionGpsAccuracy(),
                     saved.getTokenQrUtilizado(),
+                    saved.getLatitud(),
+                    saved.getLongitud(),
+                    saved.getEsMockLocation(),
+                    saved.getFotoCapturaUrl(),
+                    saved.getScoreFacialCoincidencia() != null ? saved.getScoreFacialCoincidencia().doubleValue() : null,
                     request.tipoMarcacion(),
                     request.origenMarcacion(),
                     mensaje
@@ -257,6 +286,13 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
         if (request.tokenQr() != null && !request.tokenQr().isBlank()) {
             existente.setTokenQrUtilizado(request.tokenQr());
         }
+        if (request.latitud() != null) existente.setLatitud(request.latitud());
+        if (request.longitud() != null) existente.setLongitud(request.longitud());
+        if (request.esMockLocation() != null) existente.setEsMockLocation(request.esMockLocation());
+        if (request.fotoCapturaUrl() != null) existente.setFotoCapturaUrl(request.fotoCapturaUrl());
+        if (request.scoreFacialCoincidencia() != null) {
+            existente.setScoreFacialCoincidencia(BigDecimal.valueOf(request.scoreFacialCoincidencia()));
+        }
 
         RegistroAsistencia saved = registroAsistenciaRepository.save(existente);
         return new RegistroAsistenciaResponse(
@@ -275,6 +311,11 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
                 saved.getEsFacialVerificado(),
                 saved.getPrecisionGpsAccuracy(),
                 saved.getTokenQrUtilizado(),
+                saved.getLatitud(),
+                saved.getLongitud(),
+                saved.getEsMockLocation(),
+                saved.getFotoCapturaUrl(),
+                saved.getScoreFacialCoincidencia() != null ? saved.getScoreFacialCoincidencia().doubleValue() : null,
                 request.tipoMarcacion(),
                 request.origenMarcacion(),
                 "Salida registrada correctamente"
@@ -516,11 +557,74 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
         );
     }
 
+    private void validarMarcacionSeguridad(RegistrarAsistenciaRequest request, Empleado empleado, UUID tenantId, String modalidadAplicableHoy) {
+        // 1. Validar origen vs modalidad
+        validarOrigenVsModalidad(request.origenMarcacion(), modalidadAplicableHoy, request.tokenQr(), request.precisionGpsAccuracy());
+
+        // 2. Validar Mock Location (GPS simulado)
+        if (Boolean.TRUE.equals(request.esMockLocation())) {
+            String detalles = String.format("GPS simulado detectado para empleado %s (ID: %s). Coordenadas enviadas: Lat=%s, Lon=%s. Origen: %s",
+                    empleado.getNombreCompleto(), empleado.getId(), request.latitud(), request.longitud(), request.origenMarcacion());
+            alertaService.registrarYDispararAlerta(empleado, "MOCK_LOCATION_DETECTADA", detalles);
+            throw new BadRequestException("No se permiten ubicaciones simuladas o alteradas.");
+        }
+
+        // 3. Validar QR Dinámico
+        if ("PRESENCIAL".equalsIgnoreCase(modalidadAplicableHoy) && request.origenMarcacion() == OrigenMarcacionAsistencia.QR_DINAMICO) {
+            qrValidationService.validarQrDinamico(request.tokenQr(), tenantId);
+        }
+
+        // 4. Validar Biometría y Geolocalización para modalidad REMOTO
+        if ("REMOTO".equalsIgnoreCase(modalidadAplicableHoy)) {
+            // A. Validación Biométrica Facial
+            if (request.fotoCapturaUrl() == null || request.fotoCapturaUrl().isBlank()) {
+                throw new BadRequestException("La modalidad remota requiere una captura fotográfica.");
+            }
+            if (!Boolean.TRUE.equals(request.esFacialVerificado()) || request.scoreFacialCoincidencia() == null || request.scoreFacialCoincidencia() < 80.0) {
+                String detalles = String.format("Falla de coincidencia facial para empleado %s (ID: %s). EsFacialVerificado: %s, Score Coincidencia: %s. URL Captura: %s",
+                        empleado.getNombreCompleto(), empleado.getId(), request.esFacialVerificado(), request.scoreFacialCoincidencia(), request.fotoCapturaUrl());
+                alertaService.registrarYDispararAlerta(empleado, "FACE_MISMATCH", detalles);
+                throw new BadRequestException("Falla de verificación biométrica. El rostro no coincide.");
+            }
+
+            // B. Validación de Geolocalización (Geocercas)
+            if (request.latitud() == null || request.longitud() == null) {
+                throw new BadRequestException("La modalidad remota requiere coordenadas GPS.");
+            }
+
+            List<com.proyecto.version1.Features.GeocercasRemota.GeocercasRemota> geocercas =
+                    geocercasRemotaRepository.findByEmpleado_IdAndEmpleado_EmpresaId(empleado.getId(), tenantId);
+
+            if (geocercas.isEmpty()) {
+                String detalles = String.format("El empleado %s (ID: %s) intentó marcar asistencia remota sin geocercas configuradas. Coordenadas enviadas: Lat=%s, Lon=%s",
+                        empleado.getNombreCompleto(), empleado.getId(), request.latitud(), request.longitud());
+                alertaService.registrarYDispararAlerta(empleado, "FUERA_DE_GEOCERCA", detalles);
+                throw new BadRequestException("El empleado no tiene ninguna geocerca remota configurada.");
+            }
+
+            boolean dentroDeAlgunaGeocerca = false;
+            for (com.proyecto.version1.Features.GeocercasRemota.GeocercasRemota geocerca : geocercas) {
+                double distancia = GeoUtils.calcularDistanciaMetros(
+                        request.latitud(), request.longitud(), geocerca.getLatitud(), geocerca.getLongitud());
+                if (distancia <= geocerca.getRadioToleranciaMetros()) {
+                    dentroDeAlgunaGeocerca = true;
+                    break;
+                }
+            }
+
+            if (!dentroDeAlgunaGeocerca) {
+                String detalles = String.format("Empleado %s (ID: %s) fuera del radio de sus geocercas permitidas. Coordenadas enviadas: Lat=%s, Lon=%s",
+                        empleado.getNombreCompleto(), empleado.getId(), request.latitud(), request.longitud());
+                alertaService.registrarYDispararAlerta(empleado, "FUERA_DE_GEOCERCA", detalles);
+                throw new BadRequestException("El dispositivo se encuentra fuera de la geocerca permitida.");
+            }
+        }
+    }
+
     private void validarOrigenVsModalidad(
             OrigenMarcacionAsistencia origen,
             String modalidadAplicableHoy,
             String tokenQr,
-            Boolean esFacialVerificado,
             BigDecimal precisionGpsAccuracy) {
 
         if ("PRESENCIAL".equalsIgnoreCase(modalidadAplicableHoy)) {
@@ -537,9 +641,6 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
             if (origen != OrigenMarcacionAsistencia.BOTON_REMOTO) {
                 throw new BadRequestException("La modalidad remota debe registrarse desde el boton de asistencia remota.");
             }
-            if (!Boolean.TRUE.equals(esFacialVerificado)) {
-                throw new BadRequestException("La modalidad remota requiere verificacion facial.");
-            }
             if (precisionGpsAccuracy == null) {
                 throw new BadRequestException("La modalidad remota requiere precision GPS.");
             }
@@ -547,6 +648,29 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
         }
 
         throw new BadRequestException("La modalidad del dia no permite marcacion en este momento.");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.proyecto.version1.Features.GeocercasRemota.dto.GeocercaRemotaResponse> consultarMisGeocercas() {
+        UUID tenantId = requireTenant();
+        Empleado empleado = requireCurrentEmployee(tenantId);
+        
+        List<com.proyecto.version1.Features.GeocercasRemota.GeocercasRemota> geocercas =
+                geocercasRemotaRepository.findByEmpleado_IdAndEmpleado_EmpresaId(empleado.getId(), tenantId);
+                
+        List<com.proyecto.version1.Features.GeocercasRemota.dto.GeocercaRemotaResponse> response = new ArrayList<>();
+        for (com.proyecto.version1.Features.GeocercasRemota.GeocercasRemota g : geocercas) {
+            response.add(new com.proyecto.version1.Features.GeocercasRemota.dto.GeocercaRemotaResponse(
+                    g.getId(),
+                    g.getEmpleado().getId(),
+                    g.getDescripcion(),
+                    g.getLatitud(),
+                    g.getLongitud(),
+                    g.getRadioToleranciaMetros()
+            ));
+        }
+        return response;
     }
 }
 

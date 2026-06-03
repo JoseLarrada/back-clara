@@ -107,6 +107,7 @@ public class ReportesPrenominaMensualServiceImpl implements ReportesPrenominaMen
             entity.setMontoDeduccionesFaltas(calculado.numerico().montoDeduccionesFaltas());
             entity.setMontoNetoPagar(calculado.numerico().montoNetoPagar());
             entity.setEstadoReporte(ESTADO_BORRADOR);
+            entity.setRequiereRecalculo(false);
             guardados.add(reportesRepository.save(entity));
         }
 

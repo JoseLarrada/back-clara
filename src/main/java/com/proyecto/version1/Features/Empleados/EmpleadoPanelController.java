@@ -8,10 +8,12 @@ import com.proyecto.version1.Features.Empleados.dto.HistorialAsistenciaMensualRe
 import com.proyecto.version1.Features.Empleados.dto.RegistrarAsistenciaRequest;
 import com.proyecto.version1.Features.Empleados.dto.RegistroAsistenciaResponse;
 import com.proyecto.version1.Features.Empleados.service.EmpleadoPanelService;
+import com.proyecto.version1.Features.GeocercasRemota.dto.GeocercaRemotaResponse;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesEmpleadoCreateRequest;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesResponse;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesSaldoResponse;
 import com.proyecto.version1.Features.Vacaciones.service.VacacionesService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -55,6 +57,12 @@ public class EmpleadoPanelController {
     @Operation(summary = "Consultar saldo de vacaciones", description = "Muestra el saldo actual del empleado autenticado antes de enviar la solicitud")
     public ResponseEntity<@NonNull VacacionesSaldoResponse> consultarMiSaldoVacaciones() {
         return ResponseEntity.ok(vacacionesService.consultarMiSaldo());
+    }
+
+    @GetMapping("/geocercas")
+    @Operation(summary = "Consultar mis geocercas", description = "Muestra las geocercas registradas para el empleado autenticado")
+    public ResponseEntity<@NonNull List<GeocercaRemotaResponse>> consultarMisGeocercas() {
+        return ResponseEntity.ok(empleadoPanelService.consultarMisGeocercas());
     }
 
     @PostMapping("/vacaciones")

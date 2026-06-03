@@ -36,7 +36,8 @@ public class SecurityConfig {
             "/webjars/**",
             "/swagger-ui.html",
             "/api/users/**",
-
+            "/ws/ubicaciones",
+            "/ws/ubicaciones/**"
     };
 
     private static final String[] PRIVATE_URLS_LOGIN = {

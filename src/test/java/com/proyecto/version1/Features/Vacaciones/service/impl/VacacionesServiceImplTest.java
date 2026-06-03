@@ -1,9 +1,11 @@
 package com.proyecto.version1.Features.Vacaciones.service.impl;
 
+import com.proyecto.version1.Features.Auditoria.AuditoriaService;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.repository.EmpleadosRepository;
 import com.proyecto.version1.Features.Empresas.exception.BadRequestException;
 import com.proyecto.version1.Features.Vacaciones.SolicitudesVacacione;
+import com.proyecto.version1.Features.Vacaciones.repository.MovimientoVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.repository.SolicitudesVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesResponse;
 import com.proyecto.version1.security.TenantContext;
@@ -27,7 +29,9 @@ class VacacionesServiceImplTest {
     void aprobarSolicitudDebeDescontarSaldoAutomaticamente() {
         SolicitudesVacacionesRepository solicitudesRepository = mock(SolicitudesVacacionesRepository.class);
         EmpleadosRepository empleadosRepository = mock(EmpleadosRepository.class);
-        VacacionesServiceImpl service = new VacacionesServiceImpl(solicitudesRepository, empleadosRepository);
+        MovimientoVacacionesRepository movimientoRepository = mock(MovimientoVacacionesRepository.class);
+        AuditoriaService auditoriaService = mock(AuditoriaService.class);
+        VacacionesServiceImpl service = new VacacionesServiceImpl(solicitudesRepository, empleadosRepository, movimientoRepository, auditoriaService);
 
         UUID empresaId = UUID.randomUUID();
         UUID empleadoId = UUID.randomUUID();
@@ -49,6 +53,7 @@ class VacacionesServiceImplTest {
                 .build();
 
         TenantContext.setCurrentTenant(empresaId);
+        when(movimientoRepository.getSaldoVacaciones(empleadoId)).thenReturn(10);
         when(solicitudesRepository.findByIdAndEmpleado_EmpresaId(solicitudId, empresaId)).thenReturn(Optional.of(solicitud));
         when(solicitudesRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(empleadosRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -61,6 +66,7 @@ class VacacionesServiceImplTest {
             assertEquals(7, response.saldoVacacionesDespues());
             verify(empleadosRepository).save(any());
             verify(solicitudesRepository).save(any());
+            verify(movimientoRepository).save(any());
         } finally {
             TenantContext.clear();
         }
@@ -70,7 +76,9 @@ class VacacionesServiceImplTest {
     void aprobarSolicitudDebeFallarSiNoExisteSaldoSuficiente() {
         SolicitudesVacacionesRepository solicitudesRepository = mock(SolicitudesVacacionesRepository.class);
         EmpleadosRepository empleadosRepository = mock(EmpleadosRepository.class);
-        VacacionesServiceImpl service = new VacacionesServiceImpl(solicitudesRepository, empleadosRepository);
+        MovimientoVacacionesRepository movimientoRepository = mock(MovimientoVacacionesRepository.class);
+        AuditoriaService auditoriaService = mock(AuditoriaService.class);
+        VacacionesServiceImpl service = new VacacionesServiceImpl(solicitudesRepository, empleadosRepository, movimientoRepository, auditoriaService);
 
         UUID empresaId = UUID.randomUUID();
         UUID empleadoId = UUID.randomUUID();
@@ -91,6 +99,7 @@ class VacacionesServiceImplTest {
                 .build();
 
         TenantContext.setCurrentTenant(empresaId);
+        when(movimientoRepository.getSaldoVacaciones(empleadoId)).thenReturn(1);
         when(solicitudesRepository.findByIdAndEmpleado_EmpresaId(solicitudId, empresaId)).thenReturn(Optional.of(solicitud));
 
         try {

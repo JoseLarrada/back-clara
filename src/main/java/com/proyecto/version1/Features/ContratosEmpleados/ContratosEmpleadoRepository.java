@@ -13,6 +13,10 @@ public interface ContratosEmpleadoRepository extends JpaRepository<ContratosEmpl
 
     List<ContratosEmpleado> findByEmpleado_IdAndActivoTrue(UUID empleadoId);
 
+    List<ContratosEmpleado> findByEmpleado_IdOrderByFechaIngresoDesc(UUID empleadoId);
+
+    boolean existsByEmpleado_IdAndActivoTrue(UUID empleadoId);
+
     Optional<ContratosEmpleado> findTopByEmpleado_IdAndActivoTrueAndFechaIngresoLessThanEqualAndFechaRetiroIsNullOrderByFechaIngresoDesc(
             UUID empleadoId,
             LocalDate fechaReferencia

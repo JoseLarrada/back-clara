@@ -1,6 +1,9 @@
 package com.proyecto.version1.Features.Empleados.service.impl;
 
 import com.proyecto.version1.Features.Calendario.repository.CalendarioHibridoRepository;
+import com.proyecto.version1.Features.Anomalias.service.AlertaService;
+import com.proyecto.version1.Features.GeocercasRemota.repository.GeocercasRemotaRepository;
+import com.proyecto.version1.Features.RegistrosAsistencias.service.QrValidationService;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.dto.EstadoPanelEmpleadoResponse;
 import com.proyecto.version1.Features.Empleados.dto.HistorialAsistenciaMensualResponse;
@@ -55,6 +58,9 @@ class EmpleadoPanelServiceImplTest {
         RegistroAsistenciaRepository registroRepository = mock(RegistroAsistenciaRepository.class);
         ReglaHorarioRepository reglaRepository = mock(ReglaHorarioRepository.class);
         CalendarioHibridoRepository calendarioRepository = mock(CalendarioHibridoRepository.class);
+        AlertaService alertaService = mock(AlertaService.class);
+        QrValidationService qrValidationService = mock(QrValidationService.class);
+        GeocercasRemotaRepository geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
 
         Empleado empleado = Empleado.builder()
                 .id(empleadoId)
@@ -78,7 +84,10 @@ class EmpleadoPanelServiceImplTest {
                 empresaRepository,
                 registroRepository,
                 reglaRepository,
-                calendarioRepository
+                calendarioRepository,
+                alertaService,
+                qrValidationService,
+                geocercasRemotaRepository
         );
 
         EstadoPanelEmpleadoResponse response = service.obtenerPanelEmpleado();
@@ -100,6 +109,9 @@ class EmpleadoPanelServiceImplTest {
         RegistroAsistenciaRepository registroRepository = mock(RegistroAsistenciaRepository.class);
         ReglaHorarioRepository reglaRepository = mock(ReglaHorarioRepository.class);
         CalendarioHibridoRepository calendarioRepository = mock(CalendarioHibridoRepository.class);
+        AlertaService alertaService = mock(AlertaService.class);
+        QrValidationService qrValidationService = mock(QrValidationService.class);
+        GeocercasRemotaRepository geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
 
         Empleado empleado = Empleado.builder()
                 .id(empleadoId)
@@ -141,11 +153,14 @@ class EmpleadoPanelServiceImplTest {
                 empresaRepository,
                 registroRepository,
                 reglaRepository,
-                calendarioRepository
+                calendarioRepository,
+                alertaService,
+                qrValidationService,
+                geocercasRemotaRepository
         );
 
         RegistroAsistenciaResponse response = service.registrarAsistencia(
-                new RegistrarAsistenciaRequest(TipoMarcacionAsistencia.ENTRADA, OrigenMarcacionAsistencia.QR_FISICO, null, null, null)
+                new RegistrarAsistenciaRequest(TipoMarcacionAsistencia.ENTRADA, OrigenMarcacionAsistencia.QR_FISICO, null, null, null, null, null, null, null, null)
         );
 
         assertEquals(registroId, response.id());
@@ -166,6 +181,9 @@ class EmpleadoPanelServiceImplTest {
         RegistroAsistenciaRepository registroRepository = mock(RegistroAsistenciaRepository.class);
         ReglaHorarioRepository reglaRepository = mock(ReglaHorarioRepository.class);
         CalendarioHibridoRepository calendarioRepository = mock(CalendarioHibridoRepository.class);
+        AlertaService alertaService = mock(AlertaService.class);
+        QrValidationService qrValidationService = mock(QrValidationService.class);
+        GeocercasRemotaRepository geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
 
         Empleado empleado = Empleado.builder()
                 .id(empleadoId)
@@ -204,7 +222,10 @@ class EmpleadoPanelServiceImplTest {
                 empresaRepository,
                 registroRepository,
                 reglaRepository,
-                calendarioRepository
+                calendarioRepository,
+                alertaService,
+                qrValidationService,
+                geocercasRemotaRepository
         );
 
         EstadoPanelEmpleadoResponse response = service.obtenerPanelEmpleado();
@@ -226,6 +247,9 @@ class EmpleadoPanelServiceImplTest {
         RegistroAsistenciaRepository registroRepository = mock(RegistroAsistenciaRepository.class);
         ReglaHorarioRepository reglaRepository = mock(ReglaHorarioRepository.class);
         CalendarioHibridoRepository calendarioRepository = mock(CalendarioHibridoRepository.class);
+        AlertaService alertaService = mock(AlertaService.class);
+        QrValidationService qrValidationService = mock(QrValidationService.class);
+        GeocercasRemotaRepository geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
 
         Empleado empleado = Empleado.builder()
                 .id(empleadoId)
@@ -274,11 +298,14 @@ class EmpleadoPanelServiceImplTest {
                 empresaRepository,
                 registroRepository,
                 reglaRepository,
-                calendarioRepository
+                calendarioRepository,
+                alertaService,
+                qrValidationService,
+                geocercasRemotaRepository
         );
 
         RegistroAsistenciaResponse response = service.registrarAsistencia(
-                new RegistrarAsistenciaRequest(TipoMarcacionAsistencia.ALMUERZO, OrigenMarcacionAsistencia.QR_FISICO, null, null, null)
+                new RegistrarAsistenciaRequest(TipoMarcacionAsistencia.ALMUERZO, OrigenMarcacionAsistencia.QR_FISICO, null, null, null, null, null, null, null, null)
         );
 
         assertEquals(TipoMarcacionAsistencia.ALMUERZO, response.tipoMarcacionRegistrada());
@@ -297,6 +324,9 @@ class EmpleadoPanelServiceImplTest {
         RegistroAsistenciaRepository registroRepository = mock(RegistroAsistenciaRepository.class);
         ReglaHorarioRepository reglaRepository = mock(ReglaHorarioRepository.class);
         CalendarioHibridoRepository calendarioRepository = mock(CalendarioHibridoRepository.class);
+        AlertaService alertaService = mock(AlertaService.class);
+        QrValidationService qrValidationService = mock(QrValidationService.class);
+        GeocercasRemotaRepository geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
 
         Empleado empleado = Empleado.builder()
                 .id(empleadoId)
@@ -351,7 +381,10 @@ class EmpleadoPanelServiceImplTest {
                 empresaRepository,
                 registroRepository,
                 reglaRepository,
-                calendarioRepository
+                calendarioRepository,
+                alertaService,
+                qrValidationService,
+                geocercasRemotaRepository
         );
 
         HistorialAsistenciaMensualResponse response = service.obtenerHistorialMensual(anio, mes);

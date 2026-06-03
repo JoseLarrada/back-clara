@@ -42,9 +42,9 @@ public class ReglaHorarioServiceImpl implements ReglaHorarioService {
             throw new IllegalArgumentException("No puede crear reglas para una empresa diferente a la autenticada");
         }
 
-        // Validar que la hora de entrada sea anterior a la hora de salida
-        if (request.getHoraEntradaOficial().isAfter(request.getHoraSalidaOficial())) {
-            throw new IllegalArgumentException("La hora de entrada debe ser anterior a la hora de salida");
+        // Validar que la hora de entrada no sea igual a la hora de salida
+        if (request.getHoraEntradaOficial().equals(request.getHoraSalidaOficial())) {
+            throw new IllegalArgumentException("La hora de entrada no puede ser igual a la hora de salida");
         }
 
         // Validar que tiempoLimiteFalta sea mayor que minutosTolerancia
@@ -114,9 +114,9 @@ public class ReglaHorarioServiceImpl implements ReglaHorarioService {
     public ReglaHorarioResponse actualizar(UUID reglaHorarioId, ReglaHorarioUpdateRequest request) {
         UUID tenantId = TenantContext.getCurrentTenant();
 
-        // Validar que la hora de entrada sea anterior a la hora de salida
-        if (request.getHoraEntradaOficial().isAfter(request.getHoraSalidaOficial())) {
-            throw new IllegalArgumentException("La hora de entrada debe ser anterior a la hora de salida");
+        // Validar que la hora de entrada no sea igual a la hora de salida
+        if (request.getHoraEntradaOficial().equals(request.getHoraSalidaOficial())) {
+            throw new IllegalArgumentException("La hora de entrada no puede ser igual a la hora de salida");
         }
 
         // Validar que tiempoLimiteFalta sea mayor que minutosTolerancia

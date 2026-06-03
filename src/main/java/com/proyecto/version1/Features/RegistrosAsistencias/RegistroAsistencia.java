@@ -64,11 +64,27 @@ public class RegistroAsistencia {
     @Column(name = "es_facial_verificado", nullable = false)
     private Boolean esFacialVerificado = false;
 
-    @Column(name = "precision_gps_accuracy", precision = 5, scale = 2)
+    @Column(name = "precision_gps_accuracy", precision = 10, scale = 2)
     private BigDecimal precisionGpsAccuracy;
 
     @Column(name = "token_qr_utilizado")
     private String tokenQrUtilizado;
+
+    @Column(name = "latitud", precision = 10, scale = 8)
+    private BigDecimal latitud;
+
+    @Column(name = "longitud", precision = 11, scale = 8)
+    private BigDecimal longitud;
+
+    @ColumnDefault("false")
+    @Column(name = "es_mock_location")
+    private Boolean esMockLocation = false;
+
+    @Column(name = "foto_captura_url", length = 500)
+    private String fotoCapturaUrl;
+
+    @Column(name = "score_facial_coincidencia", precision = 5, scale = 2)
+    private BigDecimal scoreFacialCoincidencia;
 
     @ColumnDefault("'ENTRADA'")
     @Column(name = "tipo_registro", nullable = false, length = 20)

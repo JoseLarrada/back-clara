@@ -12,6 +12,11 @@ public record RegistrarAsistenciaRequest(
         @Size(max = 500, message = "El token QR no puede superar 500 caracteres")
         @Nullable String tokenQr,
         @Nullable Boolean esFacialVerificado,
-        @Nullable BigDecimal precisionGpsAccuracy
+        @Nullable BigDecimal precisionGpsAccuracy,
+        @Nullable BigDecimal latitud,
+        @Nullable BigDecimal longitud,
+        @Nullable Boolean esMockLocation,
+        @Nullable String fotoCapturaUrl,
+        @Nullable Double scoreFacialCoincidencia
 ) {}
 

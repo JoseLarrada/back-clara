@@ -7,6 +7,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import org.hibernate.annotations.TenantId;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -22,6 +24,10 @@ public class GeocercasRemota {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private UUID id;
+
+    @TenantId
+    @Column(name = "empresa_id", nullable = false)
+    private UUID empresaId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)

@@ -77,6 +77,11 @@ public class ReportesPrenominaMensual {
     @Column(name = "estado_reporte", nullable = false, length = 20)
     private String estadoReporte;
 
+    @ColumnDefault("false")
+    @Column(name = "requiere_recalculo", nullable = false)
+    @Builder.Default
+    private Boolean requiereRecalculo = false;
+
     @ColumnDefault("CURRENT_TIMESTAMP")
     @CreationTimestamp
     @Column(name = "generado_el")

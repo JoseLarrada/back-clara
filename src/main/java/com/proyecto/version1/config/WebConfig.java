@@ -14,7 +14,8 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("http://localhost:5173") // ✅ usa esto
+                        .allowedOriginPatterns("http://localhost:5173",
+                                "https://83g0154l-5173.use2.devtunnels.ms") // ✅ usa esto
                         .allowedMethods("*")
                         .allowedHeaders("*")
                         .allowCredentials(true);

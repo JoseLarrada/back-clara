@@ -1,15 +1,18 @@
 package com.proyecto.version1.Features.Vacaciones.service.impl;
 
+import com.proyecto.version1.Features.Auditoria.AuditoriaService;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.repository.EmpleadosRepository;
 import com.proyecto.version1.Features.Empresas.dto.PageResponse;
 import com.proyecto.version1.Features.Empresas.exception.BadRequestException;
 import com.proyecto.version1.Features.Empresas.exception.ResourceNotFoundException;
+import com.proyecto.version1.Features.Vacaciones.MovimientoVacaciones;
 import com.proyecto.version1.Features.Vacaciones.SolicitudesVacacione;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesCreateRequest;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesEmpleadoCreateRequest;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesResponse;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesSaldoResponse;
+import com.proyecto.version1.Features.Vacaciones.repository.MovimientoVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.repository.SolicitudesVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.service.VacacionesService;
 import com.proyecto.version1.security.TenantContext;
@@ -39,6 +42,8 @@ public class VacacionesServiceImpl implements VacacionesService {
 
     private final SolicitudesVacacionesRepository solicitudesVacacionesRepository;
     private final EmpleadosRepository empleadosRepository;
+    private final MovimientoVacacionesRepository movimientoVacacionesRepository;
+    private final AuditoriaService auditoriaService;
 
     @Override
     public VacacionesResponse crearSolicitud(VacacionesCreateRequest request) {
@@ -51,12 +56,16 @@ public class VacacionesServiceImpl implements VacacionesService {
 
         SolicitudesVacacione entity = SolicitudesVacacione.builder()
                 .empleado(empleado)
+                .empresaId(empleado.getEmpresaId())
                 .fechaInicio(request.fechaInicio())
                 .fechaFin(request.fechaFin())
                 .estadoSolicitud(PENDIENTE)
                 .build();
 
         SolicitudesVacacione saved = solicitudesVacacionesRepository.save(entity);
+
+        auditoriaService.registrarLog("CREAR_SOLICITUD_VACACIONES", "solicitudes_vacaciones", saved.getId(), null, saved);
+
         return toResponse(saved, diasSolicitados, saldoActual, saldoActual);
     }
 
@@ -89,17 +98,31 @@ public class VacacionesServiceImpl implements VacacionesService {
 
         Empleado empleado = solicitud.getEmpleado();
         int saldoAntes = saldoActual(empleado);
-        int diasSolicitados = calcularDias(solicitud.getFechaInicio(), solicitud.getFechaFin());
+        int diasSolicitados = calcularDias(solicitud.getFechaInicio(),solicitud.getFechaFin());
 
         if (saldoAntes < diasSolicitados) {
             throw new BadRequestException("El empleado no tiene saldo de vacaciones suficiente para aprobar la solicitud");
         }
 
+        // 1. Guardar movimiento transaccional en el libro de vacaciones (con signo negativo para restar)
+        MovimientoVacaciones movimiento = MovimientoVacaciones.builder()
+                .empleado(empleado)
+                .empresaId(empleado.getEmpresaId())
+                .tipoMovimiento("TOMADO_APROBADO")
+                .cantidadDias(-diasSolicitados)
+                .solicitud(solicitud)
+                .build();
+        movimientoVacacionesRepository.save(movimiento);
+
+        // 2. Actualizar caché de saldo en la tabla empleados para retrocompatibilidad
         empleado.setSaldoVacaciones(saldoAntes - diasSolicitados);
         empleadosRepository.save(empleado);
 
         solicitud.setEstadoSolicitud(APROBADO);
         SolicitudesVacacione updated = solicitudesVacacionesRepository.save(solicitud);
+
+        auditoriaService.registrarLog("APROBAR_SOLICITUD_VACACIONES", "solicitudes_vacaciones", updated.getId(), solicitud, updated);
+
         return toResponse(updated, diasSolicitados, saldoAntes, saldoAntes - diasSolicitados);
     }
 
@@ -118,6 +141,9 @@ public class VacacionesServiceImpl implements VacacionesService {
 
         solicitud.setEstadoSolicitud(RECHAZADO);
         SolicitudesVacacione updated = solicitudesVacacionesRepository.save(solicitud);
+
+        auditoriaService.registrarLog("RECHAZAR_SOLICITUD_VACACIONES", "solicitudes_vacaciones", updated.getId(), solicitud, updated);
+
         return toResponse(updated, diasSolicitados, saldoActual, saldoActual);
     }
 
@@ -191,7 +217,15 @@ public class VacacionesServiceImpl implements VacacionesService {
     }
 
     private int saldoActual(Empleado empleado) {
-        return Optional.ofNullable(empleado.getSaldoVacaciones()).orElse(0);
+        // En lugar de leer el saldo mutable de la columna empleado.saldo_vacaciones,
+        // sumamos dinámicamente los registros en el libro transaccional de movimientos.
+        // Si no existen movimientos registrados aún, devolvemos la base por defecto de 15 días.
+        int totalMovimientos = movimientoVacacionesRepository.getSaldoVacaciones(empleado.getId());
+        if (totalMovimientos == 0) {
+            // Inicialización perezosa si no tiene movimientos
+            return Optional.ofNullable(empleado.getSaldoVacaciones()).orElse(15);
+        }
+        return totalMovimientos;
     }
 
     private int calcularDias(LocalDate fechaInicio, LocalDate fechaFin) {

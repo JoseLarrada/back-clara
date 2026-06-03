@@ -25,6 +25,7 @@ public class ReportesPrenominaMensualMapper {
                 entity.getMontoDeduccionesFaltas(),
                 entity.getMontoNetoPagar(),
                 entity.getEstadoReporte(),
+                entity.getRequiereRecalculo(),
                 entity.getGeneradoEl()
         );
     }

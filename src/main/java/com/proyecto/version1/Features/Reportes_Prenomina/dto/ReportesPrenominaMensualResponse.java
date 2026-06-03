@@ -20,6 +20,7 @@ public record ReportesPrenominaMensualResponse(
         BigDecimal montoDeduccionesFaltas,
         BigDecimal montoNetoPagar,
         String estadoReporte,
+        Boolean requiereRecalculo,
         OffsetDateTime generadoEl
 ) {}
 

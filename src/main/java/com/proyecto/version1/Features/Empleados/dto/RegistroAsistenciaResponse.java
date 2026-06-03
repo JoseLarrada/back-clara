@@ -21,6 +21,11 @@ public record RegistroAsistenciaResponse(
         Boolean esFacialVerificado,
         BigDecimal precisionGpsAccuracy,
         String tokenQrUtilizado,
+        BigDecimal latitud,
+        BigDecimal longitud,
+        Boolean esMockLocation,
+        String fotoCapturaUrl,
+        Double scoreFacialCoincidencia,
         TipoMarcacionAsistencia tipoMarcacionRegistrada,
         OrigenMarcacionAsistencia origenMarcacion,
         String mensaje
