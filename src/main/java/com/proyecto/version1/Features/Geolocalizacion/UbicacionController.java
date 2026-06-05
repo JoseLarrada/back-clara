@@ -61,12 +61,15 @@ public class UbicacionController {
 
     @GetMapping("/api/v1/admin/empleados/{empleadoId}/ruta")
     @PreAuthorize("hasAnyAuthority('ADMIN_RRHH', 'ROLE_ADMIN_RRHH')")
-    @Operation(summary = "Obtener historial de ruta", description = "Devuelve la lista de coordenadas registradas para un empleado en un día específico.")
+    @Operation(summary = "Obtener historial de ruta", description = "Devuelve la lista de coordenadas registradas para un empleado. Si no se especifica fecha, se devuelve el historial completo.")
     public ResponseEntity<List<UbicacionResponse>> obtenerRutaHistorial(
             @PathVariable UUID empleadoId,
             @RequestParam(required = false) String fecha
     ) {
-        LocalDate fechaConsulta = fecha != null ? LocalDate.parse(fecha) : LocalDate.now();
+        LocalDate fechaConsulta = null;
+        if (fecha != null && !fecha.isBlank() && !fecha.equalsIgnoreCase("null") && !fecha.equalsIgnoreCase("undefined")) {
+            fechaConsulta = LocalDate.parse(fecha);
+        }
         return ResponseEntity.ok(ubicacionService.obtenerRutaHistorial(empleadoId, fechaConsulta));
     }
 

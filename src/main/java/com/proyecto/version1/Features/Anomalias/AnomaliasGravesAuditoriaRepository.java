@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface AnomaliasGravesAuditoriaRepository extends JpaRepository<AnomaliasGravesAuditoria, UUID> {
 
     long countByEmpleadoIdAndCreadoEnBetween(UUID empleadoId, OffsetDateTime start, OffsetDateTime end);
+
+    java.util.Optional<AnomaliasGravesAuditoria> findByIdAndEmpresaId(UUID id, UUID empresaId);
 }

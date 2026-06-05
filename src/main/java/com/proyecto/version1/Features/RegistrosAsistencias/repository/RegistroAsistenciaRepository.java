@@ -26,6 +26,8 @@ public interface RegistroAsistenciaRepository extends JpaRepository<RegistroAsis
     long countByEmpresa_IdAndFechaAndEstadoEntradaIn(UUID empresaId, LocalDate fecha, java.util.Collection<String> estados);
 
     long countByEmpresa_IdAndFechaAndHoraSalidaIsNullAndModalidadAplicada(UUID empresaId, LocalDate fecha, String modalidadAplicada);
+
+    java.util.List<RegistroAsistencia> findByEmpresa_IdAndEmpleado_IdAndHoraSalidaIsNullOrderByFechaDesc(UUID empresaId, UUID empleadoId);
 }
 
 

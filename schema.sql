@@ -238,6 +238,8 @@ CREATE TABLE anomalias_graves_auditoria (
     tipo_anomalia VARCHAR(50) NOT NULL, -- 'MOCK_LOCATION_DETECTADA', 'FACE_MISMATCH', 'FUERA_DE_GEOCERCA'
     detalles_tecnicos TEXT NOT NULL, -- Volcado de metadatos JSON (Ej: accuracy = 0 enviado por atacante) (RF71)
     notificado_via_sns BOOLEAN NOT NULL DEFAULT FALSE, -- Bandera de confirmación de envío al broker de AWS SNS (RF17, RF31)
+    estado VARCHAR(50) NOT NULL DEFAULT 'PENDIENTE',
+    comentario TEXT,
     creado_en TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_anomalias_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE CASCADE,
     CONSTRAINT fk_anomalias_empleado FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE CASCADE

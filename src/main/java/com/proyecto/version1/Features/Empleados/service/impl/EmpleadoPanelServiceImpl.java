@@ -1,6 +1,8 @@
 package com.proyecto.version1.Features.Empleados.service.impl;
 
 import com.proyecto.version1.Features.Calendario.repository.CalendarioHibridoRepository;
+import com.proyecto.version1.Features.ContratosEmpleados.dto.ContratoResponse;
+import com.proyecto.version1.Features.ContratosEmpleados.service.ContratosEmpleadoService;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.dto.EstadoPanelEmpleadoResponse;
 import com.proyecto.version1.Features.Empleados.dto.HistorialAsistenciaMensualResponse;
@@ -11,6 +13,7 @@ import com.proyecto.version1.Features.Empleados.dto.TipoMarcacionAsistencia;
 import com.proyecto.version1.Features.Empleados.repository.EmpleadosRepository;
 import com.proyecto.version1.Features.Empleados.service.EmpleadoPanelService;
 import com.proyecto.version1.Features.Empresas.Empresa;
+import com.proyecto.version1.Features.Empresas.dto.PageResponse;
 import com.proyecto.version1.Features.Empresas.exception.BadRequestException;
 import com.proyecto.version1.Features.Empresas.exception.ResourceNotFoundException;
 import com.proyecto.version1.Features.Empresas.repository.EmpresaRepository;
@@ -18,12 +21,18 @@ import com.proyecto.version1.Features.ReglasHorario.ReglaHorario;
 import com.proyecto.version1.Features.ReglasHorario.ReglaHorarioRepository;
 import com.proyecto.version1.Features.RegistrosAsistencias.RegistroAsistencia;
 import com.proyecto.version1.Features.RegistrosAsistencias.repository.RegistroAsistenciaRepository;
+import com.proyecto.version1.Features.Reportes_Prenomina.dto.ReportePrenominaFilterRequest;
+import com.proyecto.version1.Features.Reportes_Prenomina.dto.ReportesPrenominaMensualResponse;
+import com.proyecto.version1.Features.Reportes_Prenomina.service.ReportesPrenominaMensualService;
 import com.proyecto.version1.security.TenantContext;
 import com.proyecto.version1.Features.Anomalias.service.AlertaService;
 import com.proyecto.version1.Features.GeocercasRemota.repository.GeocercasRemotaRepository;
 import com.proyecto.version1.Features.Geolocalizacion.GeoUtils;
 import com.proyecto.version1.Features.RegistrosAsistencias.service.QrValidationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,6 +73,8 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
     private final AlertaService alertaService;
     private final QrValidationService qrValidationService;
     private final GeocercasRemotaRepository geocercasRemotaRepository;
+    private final ContratosEmpleadoService contratosEmpleadoService;
+    private final ReportesPrenominaMensualService reportesPrenominaMensualService;
 
     @Override
     @Transactional(readOnly = true)
@@ -671,6 +682,38 @@ public class EmpleadoPanelServiceImpl implements EmpleadoPanelService {
             ));
         }
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ContratoResponse consultarMiContrato() {
+        Empleado empleado = requireCurrentEmployee(requireTenant());
+        List<ContratoResponse> contratos = contratosEmpleadoService.listarPorEmpleado(empleado.getId());
+
+        if (contratos.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontró un contrato asociado al empleado autenticado.");
+        }
+
+        return contratos.stream()
+                .filter(ContratoResponse::activo)
+                .findFirst()
+                .orElse(contratos.getFirst());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ReportesPrenominaMensualResponse> consultarMisReportesPrenomina(LocalDate fechaInicio, LocalDate fechaFin, int page, int size, String sort) {
+        Empleado empleado = requireCurrentEmployee(requireTenant());
+
+        String[] sortParts = sort.split(",");
+        String sortField = sortParts[0];
+        Sort.Direction direction = (sortParts.length > 1 && "asc".equalsIgnoreCase(sortParts[1]))
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+
+        ReportePrenominaFilterRequest filter = new ReportePrenominaFilterRequest(fechaInicio, fechaFin, empleado.getId(), null);
+        return reportesPrenominaMensualService.listar(filter, pageable);
     }
 }
 

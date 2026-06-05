@@ -4,6 +4,8 @@ import com.proyecto.version1.Features.Calendario.repository.CalendarioHibridoRep
 import com.proyecto.version1.Features.Anomalias.service.AlertaService;
 import com.proyecto.version1.Features.GeocercasRemota.repository.GeocercasRemotaRepository;
 import com.proyecto.version1.Features.RegistrosAsistencias.service.QrValidationService;
+import com.proyecto.version1.Features.ContratosEmpleados.service.ContratosEmpleadoService;
+import com.proyecto.version1.Features.Reportes_Prenomina.service.ReportesPrenominaMensualService;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.dto.EstadoPanelEmpleadoResponse;
 import com.proyecto.version1.Features.Empleados.dto.HistorialAsistenciaMensualResponse;
@@ -87,7 +89,9 @@ class EmpleadoPanelServiceImplTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                mock(ContratosEmpleadoService.class),
+                mock(ReportesPrenominaMensualService.class)
         );
 
         EstadoPanelEmpleadoResponse response = service.obtenerPanelEmpleado();
@@ -156,7 +160,9 @@ class EmpleadoPanelServiceImplTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                mock(ContratosEmpleadoService.class),
+                mock(ReportesPrenominaMensualService.class)
         );
 
         RegistroAsistenciaResponse response = service.registrarAsistencia(
@@ -225,7 +231,9 @@ class EmpleadoPanelServiceImplTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                mock(ContratosEmpleadoService.class),
+                mock(ReportesPrenominaMensualService.class)
         );
 
         EstadoPanelEmpleadoResponse response = service.obtenerPanelEmpleado();
@@ -301,7 +309,9 @@ class EmpleadoPanelServiceImplTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                mock(ContratosEmpleadoService.class),
+                mock(ReportesPrenominaMensualService.class)
         );
 
         RegistroAsistenciaResponse response = service.registrarAsistencia(
@@ -384,7 +394,9 @@ class EmpleadoPanelServiceImplTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                mock(ContratosEmpleadoService.class),
+                mock(ReportesPrenominaMensualService.class)
         );
 
         HistorialAsistenciaMensualResponse response = service.obtenerHistorialMensual(anio, mes);

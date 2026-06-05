@@ -51,12 +51,12 @@ public class AdminEmpleadoController {
         return ResponseEntity.ok(adminEmpleadoService.listarEmpleados(pageable));
     }
 
-    @GetMapping("/{empleadoId}")
+    @GetMapping("/{empleadoId:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<AdminEmpleadoResponse> obtener(@PathVariable UUID empleadoId) {
         return ResponseEntity.ok(adminEmpleadoService.obtenerEmpleado(empleadoId));
     }
 
-    @PutMapping("/{empleadoId}")
+    @PutMapping("/{empleadoId:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<AdminEmpleadoResponse> actualizar(
             @PathVariable UUID empleadoId,
             @Valid @RequestBody AdminEmpleadoUpdateRequest request
@@ -64,7 +64,7 @@ public class AdminEmpleadoController {
         return ResponseEntity.ok(adminEmpleadoService.actualizarEmpleado(empleadoId, request));
     }
 
-    @PatchMapping("/{empleadoId}/foto-patron")
+    @PatchMapping("/{empleadoId:[0-9a-fA-F\\-]{36}}/foto-patron")
     public ResponseEntity<AdminEmpleadoResponse> actualizarFotoPatron(
             @PathVariable UUID empleadoId,
             @Valid @RequestBody AdminEmpleadoFotoRequest request
@@ -72,7 +72,7 @@ public class AdminEmpleadoController {
         return ResponseEntity.ok(adminEmpleadoService.actualizarFotoPatron(empleadoId, request));
     }
 
-    @PatchMapping("/{empleadoId}/modalidad")
+    @PatchMapping("/{empleadoId:[0-9a-fA-F\\-]{36}}/modalidad")
     public ResponseEntity<AdminEmpleadoResponse> actualizarModalidad(
             @PathVariable UUID empleadoId,
             @Valid @RequestBody AdminEmpleadoModalidadRequest request
@@ -87,7 +87,7 @@ public class AdminEmpleadoController {
         return ResponseEntity.ok(adminEmpleadoService.actualizarModalidadLote(request));
     }
 
-    @DeleteMapping("/{empleadoId}")
+    @DeleteMapping("/{empleadoId:[0-9a-fA-F\\-]{36}}")
     public ResponseEntity<Void> eliminar(@PathVariable UUID empleadoId) {
         adminEmpleadoService.eliminarEmpleado(empleadoId);
         return ResponseEntity.noContent().build();

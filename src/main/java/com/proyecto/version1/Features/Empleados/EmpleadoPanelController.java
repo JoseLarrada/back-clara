@@ -2,33 +2,34 @@ package com.proyecto.version1.Features.Empleados;
 
 import com.proyecto.version1.Features.Backups_Incidencias.dto.JustificacionCreateRequest;
 import com.proyecto.version1.Features.Backups_Incidencias.dto.JustificacionResponse;
-import com.proyecto.version1.Features.Backups_Incidencias.service.BackupIncidenciasService;
+import com.proyecto.version1.Features.ContratosEmpleados.dto.ContratoResponse;
 import com.proyecto.version1.Features.Empleados.dto.EstadoPanelEmpleadoResponse;
 import com.proyecto.version1.Features.Empleados.dto.HistorialAsistenciaMensualResponse;
 import com.proyecto.version1.Features.Empleados.dto.RegistrarAsistenciaRequest;
 import com.proyecto.version1.Features.Empleados.dto.RegistroAsistenciaResponse;
 import com.proyecto.version1.Features.Empleados.service.EmpleadoPanelService;
+import com.proyecto.version1.Features.Empresas.dto.PageResponse;
 import com.proyecto.version1.Features.GeocercasRemota.dto.GeocercaRemotaResponse;
+import com.proyecto.version1.Features.Reportes_Prenomina.dto.ReportesPrenominaMensualResponse;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesEmpleadoCreateRequest;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesResponse;
 import com.proyecto.version1.Features.Vacaciones.dto.VacacionesSaldoResponse;
 import com.proyecto.version1.Features.Vacaciones.service.VacacionesService;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.jspecify.annotations.NonNull;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/v1/empleado/panel")
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 public class EmpleadoPanelController {
 
     private final EmpleadoPanelService empleadoPanelService;
-    private final BackupIncidenciasService backupIncidenciasService;
+    private final com.proyecto.version1.Features.Backups_Incidencias.service.BackupIncidenciasService backupIncidenciasService;
     private final VacacionesService vacacionesService;
 
     @GetMapping
@@ -63,6 +64,24 @@ public class EmpleadoPanelController {
     @Operation(summary = "Consultar mis geocercas", description = "Muestra las geocercas registradas para el empleado autenticado")
     public ResponseEntity<@NonNull List<GeocercaRemotaResponse>> consultarMisGeocercas() {
         return ResponseEntity.ok(empleadoPanelService.consultarMisGeocercas());
+    }
+
+    @GetMapping("/contrato")
+    @Operation(summary = "Consultar mi contrato", description = "Muestra el contrato actual del empleado autenticado, o el más reciente si no tiene uno activo")
+    public ResponseEntity<ContratoResponse> consultarMiContrato() {
+        return ResponseEntity.ok(empleadoPanelService.consultarMiContrato());
+    }
+
+    @GetMapping("/reportes-prenomina")
+    @Operation(summary = "Consultar mis reportes de pre-nómina", description = "Lista los reportes de pre-nómina del empleado autenticado dentro de un rango de fechas")
+    public ResponseEntity<PageResponse<ReportesPrenominaMensualResponse>> consultarMisReportesPrenomina(
+            @RequestParam LocalDate fechaInicio,
+            @RequestParam LocalDate fechaFin,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "anioPeriodo,desc") String sort
+    ) {
+        return ResponseEntity.ok(empleadoPanelService.consultarMisReportesPrenomina(fechaInicio, fechaFin, page, size, sort));
     }
 
     @PostMapping("/vacaciones")
@@ -133,6 +152,5 @@ public class EmpleadoPanelController {
 
         return emitter;
     }
+
 }
-
-

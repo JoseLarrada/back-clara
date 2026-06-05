@@ -18,6 +18,8 @@ import com.proyecto.version1.Features.GeocercasRemota.GeocercasRemota;
 import com.proyecto.version1.Features.GeocercasRemota.repository.GeocercasRemotaRepository;
 import com.proyecto.version1.Features.Anomalias.service.AlertaService;
 import com.proyecto.version1.Features.RegistrosAsistencias.service.QrValidationService;
+import com.proyecto.version1.Features.ContratosEmpleados.service.ContratosEmpleadoService;
+import com.proyecto.version1.Features.Reportes_Prenomina.service.ReportesPrenominaMensualService;
 import com.proyecto.version1.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,6 +57,8 @@ class RegistrosAsistenciasSeguridadTest {
     private AlertaService alertaService;
     private QrValidationService qrValidationService;
     private GeocercasRemotaRepository geocercasRemotaRepository;
+    private ContratosEmpleadoService contratosEmpleadoService;
+    private ReportesPrenominaMensualService reportesPrenominaMensualService;
 
     private EmpleadoPanelServiceImpl service;
 
@@ -71,6 +75,8 @@ class RegistrosAsistenciasSeguridadTest {
         alertaService = mock(AlertaService.class);
         qrValidationService = mock(QrValidationService.class);
         geocercasRemotaRepository = mock(GeocercasRemotaRepository.class);
+        contratosEmpleadoService = mock(ContratosEmpleadoService.class);
+        reportesPrenominaMensualService = mock(ReportesPrenominaMensualService.class);
 
         empleado = Empleado.builder()
                 .id(empleadoId)
@@ -117,7 +123,9 @@ class RegistrosAsistenciasSeguridadTest {
                 calendarioRepository,
                 alertaService,
                 qrValidationService,
-                geocercasRemotaRepository
+                geocercasRemotaRepository,
+                contratosEmpleadoService,
+                reportesPrenominaMensualService
         );
     }
 

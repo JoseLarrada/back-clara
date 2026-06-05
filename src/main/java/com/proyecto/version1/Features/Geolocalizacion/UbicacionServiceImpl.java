@@ -150,7 +150,7 @@ public class UbicacionServiceImpl implements UbicacionService {
     @Override
     @Transactional(readOnly = true)
     public List<UbicacionResponse> obtenerUltimasUbicaciones(UUID empresaId) {
-        return ultimaUbicacionRepository.findByEmpleadoEmpresaId(empresaId).stream()
+        return ultimaUbicacionRepository.findByEmpleado_EmpresaId(empresaId).stream()
                 .map(u -> new UbicacionResponse(
                         u.getEmpleadoId(),
                         u.getEmpleado().getNombreCompleto(),
@@ -169,10 +169,16 @@ public class UbicacionServiceImpl implements UbicacionService {
     @Override
     @Transactional(readOnly = true)
     public List<UbicacionResponse> obtenerRutaHistorial(UUID empleadoId, LocalDate fecha) {
-        OffsetDateTime inicio = fecha.atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime();
-        OffsetDateTime fin = fecha.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime().minusNanos(1);
+        List<HistorialUbicacion> historial;
+        if (fecha != null) {
+            OffsetDateTime inicio = fecha.atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime();
+            OffsetDateTime fin = fecha.plusDays(1).atStartOfDay().atZone(ZoneId.systemDefault()).toOffsetDateTime().minusNanos(1);
+            historial = historialUbicacionRepository.findByEmpleado_IdAndRegistradoEnBetweenOrderByRegistradoEnAsc(empleadoId, inicio, fin);
+        } else {
+            historial = historialUbicacionRepository.findByEmpleado_IdOrderByRegistradoEnAsc(empleadoId);
+        }
 
-        return historialUbicacionRepository.findByEmpleadoIdAndRegistradoEnBetween(empleadoId, inicio, fin).stream()
+        return historial.stream()
                 .map(h -> new UbicacionResponse(
                         h.getEmpleado().getId(),
                         h.getEmpleado().getNombreCompleto(),
@@ -201,7 +207,7 @@ public class UbicacionServiceImpl implements UbicacionService {
                 .collect(Collectors.toMap(r -> r.getEmpleado().getId(), r -> r, (r1, r2) -> r1));
 
         // 3. Obtener últimas ubicaciones registradas
-        List<UltimaUbicacion> ubicaciones = ultimaUbicacionRepository.findByEmpleadoEmpresaId(empresaId);
+        List<UltimaUbicacion> ubicaciones = ultimaUbicacionRepository.findByEmpleado_EmpresaId(empresaId);
         Map<UUID, UltimaUbicacion> ubicacionMap = ubicaciones.stream()
                 .collect(Collectors.toMap(UltimaUbicacion::getEmpleadoId, u -> u, (u1, u2) -> u1));
 

@@ -47,6 +47,13 @@ public class AnomaliasGravesAuditoria {
     @Builder.Default
     private Boolean notificadoViaSns = false;
 
+    @Column(name = "estado", nullable = false, length = 50)
+    @Builder.Default
+    private String estado = "PENDIENTE";
+
+    @Column(name = "comentario", length = Integer.MAX_VALUE)
+    private String comentario;
+
     @CreationTimestamp
     @Column(name = "creado_en")
     private OffsetDateTime creadoEn;
