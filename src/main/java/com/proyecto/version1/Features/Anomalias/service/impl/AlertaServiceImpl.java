@@ -4,6 +4,7 @@ import com.proyecto.version1.Features.Anomalias.AnomaliasGravesAuditoria;
 import com.proyecto.version1.Features.Anomalias.AnomaliasGravesAuditoriaRepository;
 import com.proyecto.version1.Features.Anomalias.service.AlertaService;
 import com.proyecto.version1.Features.Empleados.Empleado;
+import com.proyecto.version1.Features.Notifications.service.NotificationService;
 import com.proyecto.version1.Features.Geolocalizacion.UbicacionWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ public class AlertaServiceImpl implements AlertaService {
 
     private final AnomaliasGravesAuditoriaRepository anomaliasRepository;
     private final UbicacionWebSocketHandler webSocketHandler;
+    private final NotificationService notificationService;
 
     @Async
     @Override
@@ -41,10 +43,16 @@ public class AlertaServiceImpl implements AlertaService {
                 .build();
 
         try {
-            simularSnsPublish(empleado, tipoAnomalia, detallesTecnicos);
+            notificationService.sendBusinessEvent(
+                    "ALERTA DE SEGURIDAD - Anomalía Grave",
+                    String.format("Se ha detectado una anomalía tipo [%s] para el empleado %s. Detalles: %s",
+                            tipoAnomalia, empleado.getNombreCompleto(), detallesTecnicos),
+                    "ANOMALIA_SEGURIDAD",
+                    empleado.getEmpresaId()
+            );
             anomalia.setNotificadoViaSns(true);
         } catch (Exception e) {
-            log.error("Error al publicar evento en AWS SNS (Simulación)", e);
+            log.error("Error al publicar evento en AWS SNS", e);
         }
 
         AnomaliasGravesAuditoria saved = anomaliasRepository.save(anomalia);

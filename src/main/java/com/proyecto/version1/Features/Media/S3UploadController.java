@@ -33,4 +33,26 @@ public class S3UploadController {
         String url = s3Service.uploadFile(file, "empleados");
         return ResponseEntity.ok(Map.of("url", url));
     }
+
+    @GetMapping("/presigned-url")
+    @Operation(summary = "Obtener URL firmada para subir archivo directamente a S3",
+               description = "Genera una URL temporal que permite al frontend subir un archivo a S3 sin pasar por el backend.")
+    public ResponseEntity<Map<String, String>> getPresignedUrl(
+            @RequestParam String folder,
+            @RequestParam String fileName,
+            @RequestParam String contentType) {
+
+        java.util.UUID tenantId = com.proyecto.version1.security.TenantContext.getTenantId();
+        if (tenantId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String url = s3Service.generatePresignedFileUploadUrl(tenantId, folder, fileName, contentType);
+        String finalKey = String.format("tenants/%s/%s/%s", tenantId, folder, fileName);
+
+        return ResponseEntity.ok(Map.of(
+            "uploadUrl", url,
+            "fileKey", finalKey
+        ));
+    }
 }

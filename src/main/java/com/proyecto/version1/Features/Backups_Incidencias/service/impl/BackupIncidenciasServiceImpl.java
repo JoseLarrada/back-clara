@@ -8,6 +8,7 @@ import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.Features.Empleados.repository.EmpleadosRepository;
 import com.proyecto.version1.Features.Backups_Incidencias.repository.BackupIncidenciasJustificacionesRepository;
 import com.proyecto.version1.Features.Backups_Incidencias.service.BackupIncidenciasService;
+import com.proyecto.version1.Features.Notifications.service.NotificationService;
 import com.proyecto.version1.Features.Empresas.dto.PageResponse;
 import com.proyecto.version1.Features.Empresas.exception.BadRequestException;
 import com.proyecto.version1.Features.Empresas.exception.ResourceNotFoundException;
@@ -40,44 +41,31 @@ public class BackupIncidenciasServiceImpl implements BackupIncidenciasService {
     private final BackupIncidenciasJustificacionesRepository justificacionesRepository;
     private final RegistroAsistenciaRepository registroAsistenciaRepository;
     private final EmpleadosRepository empleadosRepository;
-
-    @Override
-    public JustificacionResponse crearJustificacion(JustificacionCreateRequest request) {
-        UUID tenantId = requireTenant();
-        RegistroAsistencia registro = obtenerRegistroDelTenant(request.registroAsistenciaId(), tenantId);
-
-        BackupIncidenciasJustificacione entity = BackupIncidenciasJustificacione.builder()
-                .registroAsistencia(registro)
-                .motivoEmpleado(request.motivoEmpleado())
-                .urlComprobanteS3(request.urlComprobanteS3())
-                .estadoSolicitud(PENDIENTE)
-                .build();
+    private final NotificationService notificationService;
 
         BackupIncidenciasJustificacione saved = justificacionesRepository.save(entity);
+
+        notificationService.sendBusinessEvent(
+                "Nueva Justificación (Admin)",
+                String.format("Se ha creado una justificación administrativa para el registro %s",
+                        request.registroAsistenciaId()),
+                "INCIDENCIA_JUSTIFICADA_ADMIN",
+                tenantId
+        );
+
         return toResponse(saved);
     }
 
-    @Override
-    public JustificacionResponse crearJustificacionEmpleado(JustificacionCreateRequest request) {
-        UUID tenantId = requireTenant();
-        Empleado empleado = requireCurrentEmployee(tenantId);
-
-        RegistroAsistencia registro = registroAsistenciaRepository
-                .findByIdAndEmpresa_IdAndEmpleado_Id(request.registroAsistenciaId(), tenantId, empleado.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Registro de asistencia no encontrado para el empleado autenticado."));
-
-        if (!esEstadoJustificable(registro.getEstadoEntrada())) {
-            throw new BadRequestException("Solo se pueden justificar registros en estado RETARDO o FALTA.");
-        }
-
-        BackupIncidenciasJustificacione entity = BackupIncidenciasJustificacione.builder()
-                .registroAsistencia(registro)
-                .motivoEmpleado(request.motivoEmpleado())
-                .urlComprobanteS3(request.urlComprobanteS3())
-                .estadoSolicitud(PENDIENTE)
-                .build();
-
         BackupIncidenciasJustificacione saved = justificacionesRepository.save(entity);
+
+        notificationService.sendBusinessEvent(
+                "Nueva Justificación de Incidencia",
+                String.format("El empleado %s ha presentado una justificación por: %s",
+                        empleado.getNombre(), request.motivoEmpleado()),
+                "INCIDENCIA_JUSTIFICADA_EMPLEADO",
+                tenantId
+        );
+
         return toResponse(saved);
     }
 

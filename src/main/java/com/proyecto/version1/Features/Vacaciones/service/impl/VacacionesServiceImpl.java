@@ -15,6 +15,7 @@ import com.proyecto.version1.Features.Vacaciones.dto.VacacionesSaldoResponse;
 import com.proyecto.version1.Features.Vacaciones.repository.MovimientoVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.repository.SolicitudesVacacionesRepository;
 import com.proyecto.version1.Features.Vacaciones.service.VacacionesService;
+import com.proyecto.version1.Features.Notifications.service.NotificationService;
 import com.proyecto.version1.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,6 +45,7 @@ public class VacacionesServiceImpl implements VacacionesService {
     private final EmpleadosRepository empleadosRepository;
     private final MovimientoVacacionesRepository movimientoVacacionesRepository;
     private final AuditoriaService auditoriaService;
+    private final NotificationService notificationService;
 
     @Override
     public VacacionesResponse crearSolicitud(VacacionesCreateRequest request) {
@@ -65,6 +67,14 @@ public class VacacionesServiceImpl implements VacacionesService {
         SolicitudesVacacione saved = solicitudesVacacionesRepository.save(entity);
 
         auditoriaService.registrarLog("CREAR_SOLICITUD_VACACIONES", "solicitudes_vacaciones", saved.getId(), null, saved);
+
+        notificationService.sendBusinessEvent(
+                "Nueva Solicitud de Vacaciones",
+                String.format("El empleado %s ha solicitado vacaciones del %s al %s",
+                        empleado.getNombre(), request.fechaInicio(), request.fechaFin()),
+                "VACACIONES_SOLICITADAS",
+                tenantId
+        );
 
         return toResponse(saved, diasSolicitados, saldoActual, saldoActual);
     }
@@ -122,6 +132,14 @@ public class VacacionesServiceImpl implements VacacionesService {
         SolicitudesVacacione updated = solicitudesVacacionesRepository.save(solicitud);
 
         auditoriaService.registrarLog("APROBAR_SOLICITUD_VACACIONES", "solicitudes_vacaciones", updated.getId(), solicitud, updated);
+
+        notificationService.sendBusinessEvent(
+                "Solicitud de Vacaciones Aprobada",
+                String.format("Tu solicitud de vacaciones del %s al %s ha sido APROBADA",
+                        solicitud.getFechaInicio(), solicitud.getFechaFin()),
+                "VACACIONES_APROBADAS",
+                tenantId
+        );
 
         return toResponse(updated, diasSolicitados, saldoAntes, saldoAntes - diasSolicitados);
     }

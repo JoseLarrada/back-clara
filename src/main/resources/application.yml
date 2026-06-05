@@ -4,10 +4,10 @@ spring:
   config:
     import: optional:file:.env[.properties]
   datasource:
-      url: jdbc:postgresql://${DB_URL}:${DB_PORT}/${DB_NAME}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
-      driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_URL}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none
@@ -34,3 +34,5 @@ aws:
   secret-key: ${AWS_SECRET_ACCESS_KEY:mock-secret-access-key}
   s3:
     bucket: ${AWS_S3_BUCKET_NAME:mock-bucket-name}
+  sns:
+    topic-arn: ${AWS_SNS_TOPIC_ARN:mock-topic-arn}
