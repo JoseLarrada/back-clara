@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -22,16 +25,25 @@ public class AwsConfig {
     @Value("${aws.secret-key}")
     private String secretKey;
 
+    @Value("${aws.session-token:}")
+    private String sessionToken;
+
     @Bean
-    public AwsBasicCredentials awsBasicCredentials() {
-        return AwsBasicCredentials.create(accessKey, secretKey);
+    public AwsCredentialsProvider awsCredentialsProvider() {
+        if (accessKey != null && !accessKey.isBlank() && !"mock-access-key-id".equals(accessKey)) {
+            if (sessionToken != null && !sessionToken.isBlank()) {
+                return StaticCredentialsProvider.create(AwsSessionCredentials.create(accessKey, secretKey, sessionToken));
+            }
+            return StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+        }
+        return DefaultCredentialsProvider.create();
     }
 
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials()))
+                .credentialsProvider(awsCredentialsProvider())
                 .build();
     }
 
@@ -39,7 +51,7 @@ public class AwsConfig {
     public S3Presigner s3Presigner() {
         return S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials()))
+                .credentialsProvider(awsCredentialsProvider())
                 .build();
     }
 
@@ -47,7 +59,8 @@ public class AwsConfig {
     public SnsClient snsClient() {
         return SnsClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials()))
+                .credentialsProvider(awsCredentialsProvider())
                 .build();
     }
 }
+

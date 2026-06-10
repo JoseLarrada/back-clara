@@ -32,6 +32,7 @@ aws:
   region: ${AWS_REGION:us-east-1}
   access-key: ${AWS_ACCESS_KEY_ID:mock-access-key-id}
   secret-key: ${AWS_SECRET_ACCESS_KEY:mock-secret-access-key}
+  session-token: ${AWS_SESSION_TOKEN:}
   s3:
     bucket: ${AWS_S3_BUCKET_NAME:mock-bucket-name}
   sns:

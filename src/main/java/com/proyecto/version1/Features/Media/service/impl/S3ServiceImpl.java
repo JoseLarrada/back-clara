@@ -100,4 +100,43 @@ public class S3ServiceImpl implements S3Service {
             throw new RuntimeException("Error al interactuar con AWS S3", e);
         }
     }
+
+    @Override
+    public java.util.Map<String, String> uploadFileWithKey(MultipartFile file, String folder) {
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("El archivo no puede estar vacío");
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String filename = UUID.randomUUID().toString() + extension;
+        String key = folder.endsWith("/") ? folder + filename : folder + "/" + filename;
+
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            // Generar URL firmada para visualización inmediata
+            String downloadUrl = generatePresignedFileDownloadUrl(key);
+
+            return java.util.Map.of(
+                    "fileKey", key,
+                    "downloadUrl", downloadUrl
+            );
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error al leer el archivo para subir a S3", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al interactuar con AWS S3", e);
+        }
+    }
 }

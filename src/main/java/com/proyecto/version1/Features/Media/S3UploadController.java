@@ -23,15 +23,23 @@ public class S3UploadController {
     @PostMapping("/upload/justificacion")
     @Operation(summary = "Subir comprobante de justificación", description = "Sube un archivo de soporte (evidencia) al bucket de S3 en la carpeta 'justificaciones'")
     public ResponseEntity<Map<String, String>> subirJustificacion(@RequestParam("file") MultipartFile file) {
-        String url = s3Service.uploadFile(file, "justificaciones");
-        return ResponseEntity.ok(Map.of("url", url));
+        var result = s3Service.uploadFileWithKey(file, "justificaciones");
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/upload/empleado")
     @Operation(summary = "Subir foto de empleado", description = "Sube la imagen de perfil/foto de un empleado al bucket de S3 en la carpeta 'empleados'")
     public ResponseEntity<Map<String, String>> subirFotoEmpleado(@RequestParam("file") MultipartFile file) {
-        String url = s3Service.uploadFile(file, "empleados");
-        return ResponseEntity.ok(Map.of("url", url));
+        var result = s3Service.uploadFileWithKey(file, "empleados");
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/download-url")
+    @Operation(summary = "Obtener URL firmada para ver/descargar un archivo de S3",
+               description = "Genera una URL temporal (30 min) para visualizar un archivo privado de S3. Enviar el 'fileKey' almacenado en BD.")
+    public ResponseEntity<Map<String, String>> getDownloadUrl(@RequestParam String fileKey) {
+        String url = s3Service.generatePresignedFileDownloadUrl(fileKey);
+        return ResponseEntity.ok(Map.of("downloadUrl", url));
     }
 
     @GetMapping("/presigned-url")
@@ -42,7 +50,7 @@ public class S3UploadController {
             @RequestParam String fileName,
             @RequestParam String contentType) {
 
-        java.util.UUID tenantId = com.proyecto.version1.security.TenantContext.getTenantId();
+        java.util.UUID tenantId = com.proyecto.version1.security.TenantContext.getCurrentTenant();
         if (tenantId == null) {
             return ResponseEntity.status(401).build();
         }

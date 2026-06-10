@@ -71,7 +71,7 @@ public class VacacionesServiceImpl implements VacacionesService {
         notificationService.sendBusinessEvent(
                 "Nueva Solicitud de Vacaciones",
                 String.format("El empleado %s ha solicitado vacaciones del %s al %s",
-                        empleado.getNombre(), request.fechaInicio(), request.fechaFin()),
+                        empleado.getNombreCompleto(), request.fechaInicio(), request.fechaFin()),
                 "VACACIONES_SOLICITADAS",
                 tenantId
         );

@@ -27,7 +27,10 @@ public record AdminEmpleadoUpdateRequest(
         Integer saldoVacaciones,
 
         @NotNull(message = "El estado activo es obligatorio")
-        Boolean activo
+        Boolean activo,
+
+        @Size(max = 500, message = "La URL de la foto no puede superar 500 caracteres")
+        String fotoPatronUrl
 ) {
 }
 

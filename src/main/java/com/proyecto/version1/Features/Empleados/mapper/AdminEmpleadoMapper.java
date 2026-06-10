@@ -32,6 +32,9 @@ public class AdminEmpleadoMapper {
         entity.setModalidadPerfil(request.modalidadPerfil() != null ? request.modalidadPerfil().toUpperCase() : null);
         entity.setSaldoVacaciones(request.saldoVacaciones());
         entity.setActivo(request.activo());
+        if (request.fotoPatronUrl() != null) {
+            entity.setFotoPatronUrl(request.fotoPatronUrl());
+        }
     }
 
     public AdminEmpleadoResponse toResponse(Empleado entity) {

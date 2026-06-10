@@ -1,8 +1,10 @@
 package com.proyecto.version1.Features.Auditoria;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.proyecto.version1.Features.Empleados.Empleado;
 import com.proyecto.version1.security.TenantContext;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -26,6 +28,26 @@ public class AuditoriaServiceImpl implements AuditoriaService {
     private final LogsAuditoriaSistemaRepository logsRepository;
     private final ObjectMapper objectMapper;
 
+    private ObjectMapper auditMapper;
+
+    @PostConstruct
+    void init() {
+        // Copia del ObjectMapper principal con configuración tolerante a proxies Hibernate
+        auditMapper = objectMapper.copy()
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+    }
+
+    private String safeSerialize(Object value) {
+        if (value == null) return null;
+        try {
+            return auditMapper.writeValueAsString(value);
+        } catch (Exception e) {
+            // Fallback: usar toString() si la serialización falla
+            log.warn("No se pudo serializar objeto para auditoría ({}), usando toString()", e.getMessage());
+            return value.toString();
+        }
+    }
+
     @Override
     public void registrarLog(String accion, String tablaAfectada, UUID registroId, Object valorAnterior, Object valorNuevo) {
         try {
@@ -48,15 +70,8 @@ public class AuditoriaServiceImpl implements AuditoriaService {
                 tenantId = principal.getEmpresaId();
             }
 
-            String valAnteriorJson = null;
-            if (valorAnterior != null) {
-                valAnteriorJson = objectMapper.writeValueAsString(valorAnterior);
-            }
-
-            String valNuevoJson = null;
-            if (valorNuevo != null) {
-                valNuevoJson = objectMapper.writeValueAsString(valorNuevo);
-            }
+            String valAnteriorJson = safeSerialize(valorAnterior);
+            String valNuevoJson = safeSerialize(valorNuevo);
 
             String ip = null;
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
