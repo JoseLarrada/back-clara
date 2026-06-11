@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sustentación de Arquitectura de Software — CloudTime</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Mermaid.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    
+    <style>
+        :root {
+            /* Palette: Clean Corporate / Academic Light Mode */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --accent-primary: #1e3a8a; /* Corporate Deep Navy */
+            --accent-secondary: #2563eb; /* Cobalt Blue */
+            --text-primary: #0f172a; /* Slate 900 */
+            --text-secondary: #334155; /* Slate 700 */
+            --text-muted: #64748b; /* Slate 500 */
+            --border-color: #cbd5e1; /* Slate 300 */
+            
+            --sidebar-width: 320px;
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+            --transition-smooth: all 0.25s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            overflow-x: hidden;
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Sidebar Navigation styling (Clean corporate light gray) */
+        aside {
+            width: var(--sidebar-width);
+            background-color: var(--bg-secondary);
+            border-right: 2px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .logo-text h1 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            letter-spacing: -0.025em;
+            margin-bottom: 4px;
+        }
+
+        .logo-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 12px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            margin-bottom: 6px;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: var(--radius-sm);
+            transition: var(--transition-smooth);
+            border-left: 3px solid transparent;
+        }
+
+        .menu-link:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-left-color: var(--border-color);
+        }
+
+        .menu-link.active {
+            background-color: var(--bg-tertiary);
+            color: var(--accent-primary);
+            font-weight: 600;
+            border-left-color: var(--accent-primary);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 2px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Main Content Layout */
+        main {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px 60px;
+            max-width: 1300px;
+            min-height: 100vh;
+        }
+
+        header.main-header {
+            margin-bottom: 40px;
+            border-bottom: 3px solid var(--accent-primary);
+            padding-bottom: 20px;
+        }
+
+        .header-title h2 {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            font-weight: 400;
+        }
+
+        /* Report Sections */
+        .section-panel {
+            padding-top: 20px;
+            margin-bottom: 60px;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 40px;
+        }
+
+        .section-panel:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Diagrams Container (Wide and scrollable) */
+        .diagram-wrapper {
+            background-color: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin: 24px 0;
+            width: 100%;
+            overflow-x: auto;
+            display: block;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .mermaid {
+            padding: 24px;
+            min-width: 1000px; /* Forces full-width rendering, preventing squishing */
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Details & Explanations */
+        .explanation-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        h3.subsection-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        p.paragraph {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+            margin-bottom: 14px;
+            text-align: justify;
+        }
+
+        .bullet-list {
+            margin-left: 24px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+        }
+
+        .bullet-list li {
+            margin-bottom: 6px;
+        }
+
+        .highlight-text {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .badge-status {
+            background-color: rgba(5, 150, 105, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .custom-alert {
+            background-color: #fef3c7; /* Light Amber */
+            border-left: 4px solid var(--warning);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            margin: 20px 0;
+            color: #78350f;
+        }
+
+        .custom-alert-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Modernized Utility Table */
+        .utility-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 24px 0;
+            font-size: 0.95rem;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.02);
+        }
+
+        .utility-table th {
+            background-color: var(--accent-primary);
+            color: #ffffff;
+            font-family: var(--font-display);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            padding: 16px 20px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .utility-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+
+        .utility-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .utility-table tr:nth-child(even) {
+            background-color: var(--bg-secondary);
+        }
+
+        .utility-table tr:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        /* Attribute Badges */
+        .attribute-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .attribute-badge svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .badge-perf {
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .badge-sec {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+        }
+
+        .badge-avail {
+            background-color: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge-mod {
+            background-color: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+        }
+
+        /* Priority Pill Containers */
+        .priority-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .priority-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+            border: 1px solid transparent;
+            width: fit-content;
+        }
+
+        .pill-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: var(--danger);
+            border-color: #fca5a5;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: var(--warning);
+            border-color: #fcd34d;
+        }
+
+        .priority-low {
+            background-color: #d1fae5;
+            color: var(--success);
+            border-color: #6ee7b7;
+        }
+
+        /* ADR Accordions (Clean executive style with rich details) */
+        .adr-accordion {
+            margin-top: 20px;
+        }
+
+        .adr-item {
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            background-color: #ffffff;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: var(--transition-smooth);
+        }
+
+        .adr-item:hover {
+            border-color: var(--accent-secondary);
+        }
+
+        .adr-header {
+            padding: 18px 24px;
+            background-color: var(--bg-secondary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            border-bottom: 1.5px solid transparent;
+            transition: var(--transition-smooth);
+        }
+
+        .adr-header:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .adr-item.active .adr-header {
+            border-bottom-color: var(--border-color);
+            background-color: var(--bg-tertiary);
+        }
+
+        .adr-content {
+            padding: 24px;
+            display: none;
+            background-color: #ffffff;
+        }
+
+        .adr-item.active .adr-content {
+            display: block;
+        }
+
+        .adr-content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .adr-content-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .adr-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .adr-box:last-child {
+            margin-bottom: 0;
+        }
+
+        .adr-box-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .adr-box-title svg {
+            width: 18px;
+            height: 18px;
+            color: var(--accent-secondary);
+            flex-shrink: 0;
+        }
+
+        .adr-box-context {
+            border-left: 4px solid var(--text-muted);
+            background-color: #f8fafc;
+        }
+
+        .adr-box-decision {
+            border-left: 4px solid var(--accent-primary);
+            background-color: #f0fdf4; /* Soft green */
+        }
+        
+        .adr-box-decision .adr-box-title {
+            color: #15803d;
+        }
+        
+        .adr-box-decision .adr-box-title svg {
+            color: #16a34a;
+        }
+
+        .adr-consequences-box {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .consequence-subgrid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .consequence-card {
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 0.92rem;
+            border: 1px solid transparent;
+        }
+
+        .consequence-pro {
+            background-color: #ecfdf5; /* Soft Green */
+            border-color: #a7f3d0;
+            color: #065f46;
+        }
+
+        .consequence-pro .consequence-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .consequence-title svg {
+            width: 18px !important;
+            height: 18px !important;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
+        .consequence-con {
+            background-color: #fef2f2; /* Soft Red */
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .consequence-con .consequence-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .adr-box-alternatives {
+            border-left: 4px solid #d97706; /* Amber */
+            background-color: #fffbeb;
+        }
+        
+        .adr-box-alternatives .adr-box-title {
+            color: #b45309;
+        }
+        
+        .adr-box-alternatives .adr-box-title svg {
+            color: #d97706;
+        }
+
+        /* ATAM Cards layout */
+        .atam-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .atam-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .atam-card {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .atam-card-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Printing and exporting optimizations */
+        @media print {
+            aside {
+                display: none;
+            }
+            main {
+                margin-left: 0;
+                padding: 0;
+            }
+            .section-panel {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Table of Contents -->
+    <aside>
+        <div class="sidebar-header">
+            <div class="logo-text">
+                <h1>CloudTime</h1>
+                <span>Sustentación de Arquitectura</span>
+            </div>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li class="menu-item"><a class="menu-link active" href="#app">1. Acerca de la Aplicación</a></li>
+            <li class="menu-item"><a class="menu-link" href="#clases">2. Vista de Clases</a></li>
+            <li class="menu-item"><a class="menu-link" href="#secuencia">3. Vista de Secuencia</a></li>
+            <li class="menu-item"><a class="menu-link" href="#actividades">4. Vista de Actividad</a></li>
+            <li class="menu-item"><a class="menu-link" href="#paquetes">5. Vista de Paquetes</a></li>
+            <li class="menu-item"><a class="menu-link" href="#despliegue">6. Vista de Despliegue</a></li>
+            <li class="menu-item"><a class="menu-link" href="#decisiones">7. Decisiones de Arquitectura</a></li>
+            <li class="menu-item"><a class="menu-link" href="#utilidad">8. Utilidad y ATAM</a></li>
+            <li class="menu-item"><a class="menu-link" href="#trazabilidad">9. Matriz de Trazabilidad</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            Facultad de Ingeniería
+        </div>
+    </aside>
+
+    <!-- Main Content Panel (Scrollable Report View) -->
+    <main>
+        
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-title">
+                <h2>Arquitectura de Software & Diseño Físico</h2>
+                <p>Ecosistema corporativo CloudTime para el control de asistencia laboral multi-tenant</p>
+            </div>
+        </header>
+
+        <!-- 1. ACERCA DE LA APLICACIÓN -->
+        <section id="app" class="section-panel">
+            <h2 class="section-title">1. Presentación de la Aplicación Core</h2>
+            <div class="explanation-box">
+                <p class="paragraph">
+                    <span class="highlight-text">CloudTime</span> es una plataforma de software SaaS multi-tenant diseñada para el control y la auditoría de la asistencia laboral. La solución se organiza bajo una arquitectura de <span class="highlight-text">Monolito Modular</span> en Spring Boot, lo cual optimiza los costos operativos en infraestructura de nube mientras mantiene un código estructurado y desacoplado listo para escalar.
+                </p>
+                <p class="paragraph">
+                    El valor diferencial del sistema radica en su **circuito de auditoría en tiempo real**. A diferencia de los sistemas de marcación convencionales, CloudTime no delega la confianza en el dispositivo del empleado. En su lugar, el backend valida de forma estricta:
+                </p>
+                <ul class="bullet-list">
+                    <li>La integridad del hardware del dispositivo móvil (detección de emulación de coordenadas GPS o *Mock Locations*).</li>
+                    <li>La identidad biométrica del trabajador mediante reconocimiento y emparejamiento facial.</li>
+                    <li>La geolocalización física contrastada con geocercas permitidas mediante fórmulas de distancia matemática.</li>
+                </ul>
+                <p class="paragraph">
+                    Para asegurar la experiencia de usuario y el rendimiento, los procesos de red lentos e integraciones con la nube (notificaciones, logs de anomalías y alertas masivas) se procesan de forma asíncrona mediante programación concurrente multihilo, aislando el hilo principal de peticiones del servidor Tomcat.
+                </p>
+            </div>
+        </section>
+
+        <!-- 2. DIAGRAMA DE CLASES -->
+        <section id="clases" class="section-panel">
+            <h2 class="section-title">2. Vista de Clases Core y Dominio</h2>
+            <p class="paragraph">
+                Representa el modelado del dominio de datos relacional y las entidades centrales involucradas en el control de asistencia, autenticación de seguridad e incidentes de auditoría:
+            </p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+classDiagram
+    direction TB
+
+    class UserDetails {
+        &lt;&lt;interface&gt;&gt;
+        +getAuthorities() Collection
+        +getPassword() String
+        +getUsername() String
+        +isAccountNonExpired() boolean
+        +isAccountNonLocked() boolean
+        +isCredentialsNonExpired() boolean
+        +isEnabled() boolean
+    }
+
+    class Empresa {
+        +UUID id
+        +String nombre
+        +String nitRut
+        +String rubro
+        +Integer limiteEmpleados
+        +String estadoLicencia
+        +OffsetDateTime creadoEn
+        +OffsetDateTime actualizadoEn
+    }
+
+    class Empleado {
+        +UUID id
+        +UUID empresaId
+        +String nombreCompleto
+        +String email
+        +String passwordHash
+        +String rol
+        +String modalidadPerfil
+        +String fotoPatronUrl
+        +Integer saldoVacaciones
+        +Boolean activo
+        +OffsetDateTime creadoEn
+        +getAuthorities() Collection
+        +getPassword() String
+        +getUsername() String
+        +isAccountNonExpired() boolean
+        +isAccountNonLocked() boolean
+        +isCredentialsNonExpired() boolean
+        +isEnabled() boolean
+    }
+
+    class RegistroAsistencia {
+        +UUID id
+        +Empresa empresa
+        +Empleado empleado
+        +LocalDate fecha
+        +OffsetDateTime horaEntrada
+        +OffsetDateTime horaSalida
+        +OffsetDateTime horaAlmuerzoInicio
+        +OffsetDateTime horaAlmuerzoFin
+        +String modalidadAplicada
+        +String estadoEntrada
+        +Boolean esFacialVerificado
+        +BigDecimal precisionGpsAccuracy
+        +String tokenQrUtilizado
+        +BigDecimal latitud
+        +BigDecimal longitud
+        +Boolean esMockLocation
+        +String fotoCapturaUrl
+        +BigDecimal scoreFacialCoincidencia
+        +String tipoRegistro
+        +OffsetDateTime instanteServidorUltimaMarcacion
+    }
+
+    class AnomaliasGravesAuditoria {
+        +UUID id
+        +UUID empresaId
+        +Empleado empleado
+        +String tipoAnomalia
+        +String detallesTecnicos
+        +Boolean notificadoViaSns
+        +String estado
+        +String comentario
+        +OffsetDateTime creadoEn
+    }
+
+    class GeocercasRemota {
+        +UUID id
+        +UUID empresaId
+        +Empleado empleado
+        +String descripcion
+        +BigDecimal latitud
+        +BigDecimal longitud
+        +Integer radioToleranciaMetros
+    }
+
+    UserDetails &lt;|.. Empleado : implements
+    Empresa "1" *-- "*" Empleado : posee
+    Empresa "1" *-- "*" RegistroAsistencia : tiene
+    Empresa "1" *-- "*" GeocercasRemota : define
+    Empresa "1" *-- "*" AnomaliasGravesAuditoria : registra
+
+    Empleado "1" --> "*" RegistroAsistencia : genera
+    Empleado "1" --> "*" GeocercasRemota : asignado_a
+    Empleado "1" --> "*" AnomaliasGravesAuditoria : incurre_en
+                </div>
+            </div>
+
+            <div class="explanation-box">
+                <h3 class="subsection-title">Análisis de Estructuras Lógicas</h3>
+                <ul class="bullet-list">
+                    <li><strong class="highlight-text">Empresa (Tenant):</strong> Actúa como el límite lógico de multi-tenancy. Todas las tablas de dominio contienen relaciones explícitas o foráneas a esta entidad para aislar consultas por Hibernate `@TenantId`.</li>
+                    <li><strong class="highlight-text">Empleado:</strong> Implementa `UserDetails` de Spring Security, acoplando la autenticación de usuarios directamente al framework estándar de la industria.</li>
+                    <li><strong class="highlight-text">RegistroAsistencia:</strong> Es el núcleo operativo de las marcaciones, guardando datos geográficos (`latitud`/`longitud`/`precisionGpsAccuracy`), biométricos (`fotoCapturaUrl`/`scoreFacialCoincidencia`) y códigos de auditoría de QR dinámicos.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 3. DIAGRAMA DE SECUENCIA -->
+        <section id="secuencia" class="section-panel">
+            <h2 class="section-title">3. Vista de Secuencia: Flujo de Marcación y Seguridad</h2>
+            <p class="paragraph">
+                Detalla el ciclo de vida y la interacción síncrona/asíncrona entre controladores, servicios y repositorios al procesar una marcación de asistencia de un empleado remoto:
+            </p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor U as Usuario (App Móvil)
+    participant C as EmpleadoPanelController
+    participant S as EmpleadoPanelServiceImpl
+    participant R_Geo as GeocercasRemotaRepository
+    participant Utils as GeoUtils
+    participant Alert as AlertaService
+    participant R_Asis as RegistroAsistenciaRepository
+
+    U->>C: POST /asistencia (RegistrarAsistenciaRequest)
+    Note over U,C: Incluye: coordenadas, selfie, esMockLocation y verificación facial
+    activate C
+    C->>S: registrarAsistencia(request)
+    activate S
+    
+    Note over S: 1. Validar origen y modalidad ("REMOTO")
+    
+    alt esMockLocation == true
+        S->>Alert: registrarYDispararAlerta(empleado, "MOCK_LOCATION_DETECTADA", detalles)
+        activate Alert
+        Note over Alert: Dispara alerta asíncrona a AWS SNS
+        Alert-->>S: Alerta registrada
+        deactivate Alert
+        S-->>C: throw BadRequestException
+        C-->>U: HTTP 400 Bad Request (Ubicación simulada detectada)
+    end
+
+    alt fotoCapturaUrl vacía O scoreFacialCoincidencia &lt; 80.0
+        S->>Alert: registrarYDispararAlerta(empleado, "FACE_MISMATCH", detalles)
+        activate Alert
+        Note over Alert: Dispara alerta asíncrona a AWS SNS
+        Alert-->>S: Alerta registrada
+        deactivate Alert
+        S-->>C: throw BadRequestException
+        C-->>U: HTTP 400 Bad Request (Rostro no coincide)
+    end
+
+    S->>R_Geo: findByEmpleado_IdAndEmpleado_EmpresaId(empleadoId, tenantId)
+    activate R_Geo
+    R_Geo-->>S: Lista de Geocercas (geocercas)
+    deactivate R_Geo
+
+    alt geocercas está vacía
+        S->>Alert: registrarYDispararAlerta(empleado, "FUERA_DE_GEOCERCA", detalles)
+        activate Alert
+        Alert-->>S: Alerta registrada
+        deactivate Alert
+        S-->>C: throw BadRequestException
+        C-->>U: HTTP 400 Bad Request (Sin geocercas configuradas)
+    end
+
+    loop Para cada geocerca
+        S->>Utils: calcularDistanciaMetros(lat, lon, geo_lat, geo_lon)
+        activate Utils
+        Utils-->>S: distancia (en metros)
+        deactivate Utils
+        Note over S: Comprobar si distancia &lt;= radioToleranciaMetros
+    end
+
+    alt No está dentro de ninguna geocerca
+        S->>Alert: registrarYDispararAlerta(empleado, "FUERA_DE_GEOCERCA", detalles)
+        activate Alert
+        Alert-->>S: Alerta registrada
+        deactivate Alert
+        S-->>C: throw BadRequestException
+        C-->>U: HTTP 400 Bad Request (Fuera de geocerca permitida)
+    end
+
+    Note over S: 2. Crear y persistir RegistroAsistencia
+    S->>R_Asis: save(nuevoRegistro)
+    activate R_Asis
+    R_Asis-->>S: registroGuardado
+    deactivate R_Asis
+    
+    S-->>C: RegistroAsistenciaResponse
+    deactivate S
+    C-->>U: HTTP 200 OK (Asistencia registrada correctamente)
+    deactivate C
+                </div>
+            </div>
+
+            <div class="custom-alert">
+                <div class="custom-alert-title">Auditoría Defensiva de 4 Niveles</div>
+                <p class="paragraph" style="margin-bottom:0;">
+                    El backend ejecuta un esquema defensivo estricto: **Nivel 1 (Mock Location Check)** aborta de inmediato ante alteración de coordenadas; **Nivel 2 (Biometric Matching)** verifica el selfie tomado contra el patrón biométrico; **Nivel 3 (Geocerca Configurada)** valida que existan políticas geográficas; **Nivel 4 (Fórmula de Haversine)** calcula distancias de forma iterativa contra las geocercas asignadas.
+                </p>
+            </div>
+        </section>
+
+        <!-- 4. DIAGRAMA DE ACTIVIDAD -->
+        <section id="actividades" class="section-panel">
+            <h2 class="section-title">4. Vista de Actividad, Hilos y Concurrencia</h2>
+            <p class="paragraph">
+                Representa el control del flujo del proceso de auditoría y muestra explícitamente el mecanismo de **Fork/Join (Bifurcación de Hilos)**. Esto permite liberar la llamada del cliente móvil de forma instantánea mientras se delega la auditoría pesada a un hilo secundario asíncrono:
+            </p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+stateDiagram-v2
+    [*] --> RecibirPeticion : POST /asistencia
+    
+    state RecibirPeticion {
+        [*] --> ValidarOrigen
+        ValidarOrigen --> ValidarMockLocation
+        
+        state "Validar Mock Location" as ValidarMockLocation <<choice>>
+        ValidarMockLocation --> LanzarAlertaMock : esMockLocation == true
+        ValidarMockLocation --> ValidarBiometria : esMockLocation == false
+        
+        state "Validar Biometría" as ValidarBiometria <<choice>>
+        ValidarBiometria --> LanzarAlertaBiometria : score &lt; 80.0 O sin foto
+        ValidarBiometria --> ValidarGeocercas : score >= 80.0
+        
+        state "Validar Geocercas" as ValidarGeocercas <<choice>>
+        ValidarGeocercas --> LanzarAlertaGeofence : fuera de geocerca
+        ValidarGeocercas --> GuardarAsistenciaExitosa : dentro de geocerca
+    }
+
+    state Fork_Alerta <<fork>>
+    LanzarAlertaMock --> Fork_Alerta
+    LanzarAlertaBiometria --> Fork_Alerta
+    LanzarAlertaGeofence --> Fork_Alerta
+
+    state Fork_Alerta {
+        state "Hilo Principal (Request HTTP)" as HiloHTTP {
+            [*] --> CancelarRegistro
+            CancelarRegistro --> RetornarError400 : throw BadRequestException
+            RetornarError400 --> [*]
+        }
+        
+        state "Hilo Secundario (Asíncrono - @Async)" as HiloAlertas {
+            [*] --> PersistirAnomaliaDB : Guardar en Supabase
+            PersistirAnomaliaDB --> PublicarSns : Enviar a AWS SNS Topic
+            PublicarSns --> BroadcastWebSockets : Retransmitir al Panel Admin
+            BroadcastWebSockets --> [*]
+        }
+    }
+
+    state Join_Alerta <<join>>
+    HiloHTTP --> Join_Alerta
+    HiloAlertas --> Join_Alerta
+    Join_Alerta --> FinConError
+
+    GuardarAsistenciaExitosa --> PersistirAsistenciaDB
+    PersistirAsistenciaDB --> RetornarExito200
+    RetornarExito200 --> FinExitoso
+
+    FinConError --> [*]
+    FinExitoso --> [*]
+                </div>
+            </div>
+
+            <div class="explanation-box">
+                <h3 class="subsection-title">Justificación Técnica del Diseño de Hilos</h3>
+                <p class="paragraph">
+                    La llamadas de integración de red externas (notificar a **AWS SNS** o emitir eventos a través de **WebSockets**) introducen latencias aleatorias. Si este procesamiento fuera secuencial en el hilo HTTP Tomcat principal, el usuario móvil percibiría lentitud o podría sufrir timeouts de red.
+                </p>
+                <p class="paragraph">
+                    Al implementar `@Async` de Spring Boot, se realiza un **Fork**: el hilo síncrono del cliente responde de inmediato arrojando el error `BadRequestException`, liberando la conexión de red del dispositivo en milisegundos. Paralelamente, el hilo asíncrono secundario escribe la auditoría en la base de datos de Supabase, conecta con AWS SNS y despacha el aviso en tiempo real a los administradores.
+                </p>
+            </div>
+        </section>
+
+        <!-- 5. DIAGRAMA DE PAQUETES -->
+        <section id="paquetes" class="section-panel">
+            <h2 class="section-title">5. Vista de Paquetes y Arquitectura de Capas</h2>
+            <p class="paragraph">
+                Representa el acoplamiento y organización modular de las carpetas y paquetes de código de CloudTime, garantizando el principio de baja dependencia y alta cohesión (Loose Coupling):
+            </p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+flowchart TB
+    classDef Capa fill:#f5f5f5,stroke:#333,stroke-width:2px;
+    classDef Paquete fill:#fff9db,stroke:#f59f00,stroke-width:1.5px;
+    
+    subgraph CAPA_SEGURIDAD ["1. Capa de Seguridad y Acceso"]
+        direction LR
+        P_auth["auth (Controladores Login)"]:::Paquete
+        P_sec["security (JwtService, KeyUtils)"]:::Paquete
+        P_auth -.-> P_sec
+    end
+
+    subgraph CAPA_IDENTIDAD ["2. Capa de Identidad y Configuración Base"]
+        direction TB
+        P_emp["Empleados (Empleado Entity)"]:::Paquete
+        P_empr["Empresas (Tenant Boundary)"]:::Paquete
+        P_reg["ReglasHorario (Tolerancias)"]:::Paquete
+        P_recar["RecargosConfiguracion (Factores Extras)"]:::Paquete
+        P_cont["ContratosEmpleados (Salario Base)"]:::Paquete
+        
+        P_emp --> P_empr
+        P_cont --> P_emp
+        P_reg --> P_empr
+        P_recar --> P_empr
+    end
+
+    subgraph CAPA_OPERACION ["3. Capa de Operación y Telemetría"]
+        direction TB
+        P_asis["RegistrosAsistencias (RegistroAsistencia)"]:::Paquete
+        P_geo["GeocercasRemota (Geocercas)"]:::Paquete
+        P_gps["Geolocalizacion (Historial GPS)"]:::Paquete
+        P_anom["Anomalias (Motor de Fraude)"]:::Paquete
+        P_notif["Notifications (AWS SNS)"]:::Paquete
+        P_audi["Auditoria (Logs de Cambios)"]:::Paquete
+        P_cal["Calendario (Turnos Híbridos)"]:::Paquete
+
+        P_asis --> P_geo
+        P_asis --> P_anom
+        P_anom --> P_notif
+        P_gps --> P_emp
+    end
+
+    subgraph CAPA_CIERRE ["4. Capa de Cierre y Liquidación"]
+        direction TB
+        P_nom["Reportes_Prenomina (Pre-nómina Mensual)"]:::Paquete
+        P_vac["Vacaciones (Solicitudes & Movimientos)"]:::Paquete
+        P_just["Backups_Incidencias (Justificaciones)"]:::Paquete
+        P_media["Media (Amazon S3 integration)"]:::Paquete
+
+        P_just --> P_asis
+        P_just --> P_media
+        P_nom --> P_asis
+        P_nom --> P_cont
+    end
+
+    P_sec -.-> P_emp
+    CAPA_OPERACION -.-> CAPA_IDENTIDAD
+    CAPA_CIERRE -.-> CAPA_OPERACION
+    CAPA_CIERRE -.-> CAPA_IDENTIDAD
+    
+    P_config["config (AWS Config, Global Exception Handler)"]:::Paquete
+    P_config -.-> CAPA_SEGURIDAD
+    P_config -.-> CAPA_IDENTIDAD
+
+    class CAPA_SEGURIDAD,CAPA_IDENTIDAD,CAPA_OPERACION,CAPA_CIERRE Capa;
+                </div>
+            </div>
+
+            <div class="explanation-box">
+                <h3 class="subsection-title">Estructura Modular</h3>
+                <p class="paragraph">
+                    La arquitectura del monolito divide el sistema en cuatro capas lógicas:
+                </p>
+                <ul class="bullet-list">
+                    <li><strong class="highlight-text">Capa de Seguridad:</strong> Intercepta, desencripta y valida el token JWT de entrada.</li>
+                    <li><strong class="highlight-text">Capa de Identidad:</strong> Contiene las entidades maestras que configuran el tenant (`Empresa`, `Empleado`, `ReglasHorario`).</li>
+                    <li><strong class="highlight-text">Capa de Operación:</strong> Captura y evalúa la telemetría del día a día (fichajes, anomalías y auditoría).</li>
+                    <li><strong class="highlight-text">Capa de Cierre:</strong> Ejecuta cálculos periódicos de nóminas, solicitudes de vacaciones y maneja archivos adjuntos (`Media` con Amazon S3).</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 6. DIAGRAMA DE DESPLIEGUE -->
+        <section id="despliegue" class="section-panel">
+            <h2 class="section-title">6. Vista de Despliegue Físico e Infraestructura en AWS</h2>
+            <p class="paragraph">
+                Muestra la topología física y de redes de CloudTime desplegada sobre la nube pública de AWS para garantizar seguridad de datos y alta disponibilidad:
+            </p>
+            
+            <div class="diagram-wrapper">
+                <div class="mermaid">
+flowchart TD
+    subgraph Capa_Cliente [Clientes - Internet]
+        U_mob["Dispositivos Moviles - React Native"]
+        U_web["Panel Web - React / Vite"]
+    end
+
+    subgraph AWS [AWS Cloud - Region us-east-1]
+        subgraph VPC [Amazon VPC - 10.0.0.0/16]
+            IGW["Internet Gateway"]
+            subgraph Subredes_Publicas [Subredes Publicas - Multi-AZ]
+                ALB_Node["Application Load Balancer - ALB"]
+            end
+            
+            subgraph AZ_A [Availability Zone us-east-1a]
+                subgraph Subred_Privada_A [Subred Privada A - 10.0.1.0/24]
+                    Task_A["ECS Fargate Task A - app.jar - Docker"]
+                end
+            end
+
+            subgraph AZ_B [Availability Zone us-east-1b]
+                subgraph Subred_Privada_B [Subred Privada B - 10.0.2.0/24]
+                    Task_B["ECS Fargate Task B - app.jar - Docker"]
+                end
+            end
+
+            subgraph Subred_Base_Datos [Subred Privada BD - 10.0.3.0/24]
+                RDS_Node["RDS Multi-AZ Database - PostgreSQL 15"]
+            end
+        end
+
+        S3_Node["Amazon S3 Bucket - cloudtime-media-storage-dev"]
+        SNS_Node["Amazon SNS Topic - cloudtime-business-events-dev"]
+    end
+
+    U_mob -->|HTTPS| IGW
+    U_web -->|HTTPS| IGW
+    IGW --> ALB_Node
+    
+    ALB_Node -->|HTTP 8080| Task_A
+    ALB_Node -->|HTTP 8080| Task_B
+    
+    Task_A -->|JDBC| RDS_Node
+    Task_B -->|JDBC| RDS_Node
+    
+    Task_A -->|AWS SDK| S3_Node
+    Task_A -->|AWS SDK| SNS_Node
+    Task_B -->|AWS SDK| S3_Node
+    Task_B -->|AWS SDK| SNS_Node
+
+    style AWS fill:#fafafa,stroke:#999,stroke-width:2px;
+    style VPC fill:#ffffff,stroke:#ff9900,stroke-width:2px,stroke-dasharray: 5 5;
+
+    classDef Client fill:#ececff,stroke:#9370db,stroke-width:1.5px;
+    classDef Gateway fill:#fff3e0,stroke:#ffb74d,stroke-width:1.5px;
+    classDef ALB fill:#e0f2f1,stroke:#4db6ac,stroke-width:1.5px;
+    classDef Task fill:#e8f5e9,stroke:#81c784,stroke-width:2px;
+    classDef DB fill:#e0f7fa,stroke:#4dd0e1,stroke-width:1.5px;
+    classDef CloudService fill:#f3e5f5,stroke:#ba68c8,stroke-width:1.5px;
+
+    class U_mob,U_web Client;
+    class IGW Gateway;
+    class ALB_Node ALB;
+    class Task_A,Task_B Task;
+    class RDS_Node DB;
+    class S3_Node,SNS_Node CloudService;
+                </div>
+            </div>
+
+            <div class="explanation-box">
+                <h3 class="subsection-title">Estrategia de Redes y Seguridad</h3>
+                <ul class="bullet-list">
+                    <li><strong class="highlight-text">Aislamiento Perimetral (VPC):</strong> Los contenedores backend y la base de datos están en subredes privadas. Ningún recurso puede ser contactado directamente desde internet; toda llamada HTTP externa debe cruzar el **Application Load Balancer (ALB)** en la subred pública.</li>
+                    <li><strong class="highlight-text">Tolerancia a fallos física (Multi-AZ):</strong> El cluster de **ECS Fargate** distribuye las tareas en dos Availability Zones físicas independientes de AWS (`us-east-1a` y `us-east-1b`). Si una zona sufre un apagón, el ALB desvía el 100% de la carga a la otra zona de inmediato de forma transparente.</li>
+                    <li><strong class="highlight-text">RDS Multi-AZ:</strong> PostgreSQL mantiene una réplica en espejo síncrona en otra AZ física, garantizando failover automático y recuperación de conexión JDBC en < 60 segundos.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 7. DECISIONES ARQUITECTÓNICAS (ADRs) -->
+        <section id="decisiones" class="section-panel">
+            <h2 class="section-title">7. Registro de Decisiones Arquitectónicas (ADR)</h2>
+            <p class="paragraph">
+                Consolidado de las decisiones clave de arquitectura tomadas para estructurar CloudTime:
+            </p>
+
+            <div class="adr-accordion">
+                <!-- ADR 1 -->
+                <div class="adr-item">
+                    <div class="adr-header" onclick="document.querySelectorAll('.adr-item').forEach(el=>el.classList.remove('active')); this.parentElement.classList.toggle('active')">
+                        <span>ADR 1: Autenticación Stateless con JWT</span>
+                        <span class="badge-status">Aceptada</span>
+                    </div>
+                    <div class="adr-content">
+                        <div class="adr-content-grid">
+                            <!-- Left Col: Context & Decision -->
+                            <div>
+                                <div class="adr-box adr-box-context">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        Contexto y Requisito
+                                    </div>
+                                    <div class="adr-value">
+                                        La alta concurrencia de marcaciones de asistencia en horas pico puede saturar servidores que manejan sesiones en memoria o base de datos. Se requiere un mecanismo stateless y multi-tenant seguro para autorizar peticiones de la API de forma rápida.
+                                    </div>
+                                </div>
+                                <div class="adr-box adr-box-decision">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                        Decisión Adoptada
+                                    </div>
+                                    <div class="adr-value">
+                                        Implementar tokens **JWT firmados asimétricamente (RSA-256)** que transportan claims de identidad, rol, modalidad del empleado y críticamente, el `empresaId` del tenant para aislar automáticamente todas las consultas SQL en Hibernate.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Consequences & Alternatives -->
+                            <div>
+                                <div class="adr-consequences-box">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        Consecuencias
+                                    </div>
+                                    <div class="consequence-subgrid">
+                                        <div class="consequence-card consequence-pro">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Ventajas (Pros)
+                                            </div>
+                                            Escalabilidad horizontal ilimitada (stateless), y validaciones matemáticas en memoria de JVM sin viajes de red redundantes.
+                                        </div>
+                                        <div class="consequence-card consequence-con">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                Desventajas (Cons)
+                                            </div>
+                                            Dificultad para invalidación de sesión inmediata desde el servidor (mitigado con tiempos de vida de 15 minutos y Refresh Tokens).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:16px;" class="adr-box adr-box-alternatives">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/></svg>
+                                        Alternativas Consideradas
+                                    </div>
+                                    <div class="adr-value">
+                                        Sesiones tradicionales en PostgreSQL (descartado por sobrecarga de red y base de datos) o Spring Session Redis (postergado para reducir costos de infraestructura iniciales en AWS).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADR 2 -->
+                <div class="adr-item">
+                    <div class="adr-header" onclick="document.querySelectorAll('.adr-item').forEach(el=>el.classList.remove('active')); this.parentElement.classList.toggle('active')">
+                        <span>ADR 2: Selección del Tipo de Base de Datos (PostgreSQL)</span>
+                        <span class="badge-status">Aceptada</span>
+                    </div>
+                    <div class="adr-content">
+                        <div class="adr-content-grid">
+                            <!-- Left Col: Context & Decision -->
+                            <div>
+                                <div class="adr-box adr-box-context">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        Contexto y Requisito
+                                    </div>
+                                    <div class="adr-value">
+                                        Los registros de asistencia, contratos y pre-nóminas representan datos de carácter legal y financiero. Se requiere integridad referencial fuerte, transacciones ACID consistentes y soporte para consultas matemáticas de distancia (fórmula Haversine).
+                                    </div>
+                                </div>
+                                <div class="adr-box adr-box-decision">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                        Decisión Adoptada
+                                    </div>
+                                    <div class="adr-value">
+                                        Utilizar la base de datos relacional **PostgreSQL 15 (AWS RDS Multi-AZ / Supabase)** acoplada a Hibernate ORM para encapsular las políticas de multi-tenancy lógico mediante el discriminador `@TenantId`.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Consequences & Alternatives -->
+                            <div>
+                                <div class="adr-consequences-box">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        Consecuencias
+                                    </div>
+                                    <div class="consequence-subgrid">
+                                        <div class="consequence-card consequence-pro">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Ventajas (Pros)
+                                            </div>
+                                            Garantías transaccionales ACID fuertes para el motor de nóminas, llaves foráneas a nivel de motor y consultas complejas simplificadas.
+                                        </div>
+                                        <div class="consequence-card consequence-con">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                Desventajas (Cons)
+                                            </div>
+                                            Dificultad de escalado horizontal de escritura (mitigado con HikariCP y replicación con réplicas de lectura RDS).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:16px;" class="adr-box adr-box-alternatives">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/></svg>
+                                        Alternativas Consideradas
+                                    </div>
+                                    <div class="adr-value">
+                                        Bases de datos NoSQL como MongoDB o DynamoDB (descartadas por carecer de integridad referencial nativa e ineficiencia en uniones/JOINs financieros).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADR 3 -->
+                <div class="adr-item">
+                    <div class="adr-header" onclick="document.querySelectorAll('.adr-item').forEach(el=>el.classList.remove('active')); this.parentElement.classList.toggle('active')">
+                        <span>ADR 3: Estilo de Integración entre Componentes</span>
+                        <span class="badge-status">Aceptada</span>
+                    </div>
+                    <div class="adr-content">
+                        <div class="adr-content-grid">
+                            <!-- Left Col: Context & Decision -->
+                            <div>
+                                <div class="adr-box adr-box-context">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        Contexto y Requisito
+                                    </div>
+                                    <div class="adr-value">
+                                        Se requiere un canal estándar para comunicación síncrona cliente-servidor, pero al mismo tiempo se necesita despachar efectos secundarios pesados (como alertas push) sin bloquear al usuario en su app móvil.
+                                    </div>
+                                </div>
+                                <div class="adr-box adr-box-decision">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                        Decisión Adoptada
+                                    </div>
+                                    <div class="adr-value">
+                                        Implementar **APIs RESTful** síncronas usando HTTP/JSON para interacciones directas, y un broker de **mensajería asíncrona (AWS SNS)** para publicar incidentes de seguridad y notificaciones de forma desacoplada.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Consequences & Alternatives -->
+                            <div>
+                                <div class="adr-consequences-box">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        Consecuencias
+                                    </div>
+                                    <div class="consequence-subgrid">
+                                        <div class="consequence-card consequence-pro">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Ventajas (Pros)
+                                            </div>
+                                            Desacoplamiento total de alertas de auditoría, compatibilidad móvil/web universal y liberación inmediata del hilo HTTP principal.
+                                        </div>
+                                        <div class="consequence-card consequence-con">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                Desventajas (Cons)
+                                            </div>
+                                            Consistencia eventual en las notificaciones al administrador y complejidad adicional de tracing de llamadas distribuidas.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:16px;" class="adr-box adr-box-alternatives">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/></svg>
+                                        Alternativas Consideradas
+                                    </div>
+                                    <div class="adr-value">
+                                        GraphQL (descartado por complejidad multi-tenant en esta fase) o gRPC (descartado por falta de soporte nativo simple desde navegadores web).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADR 4 -->
+                <div class="adr-item">
+                    <div class="adr-header" onclick="document.querySelectorAll('.adr-item').forEach(el=>el.classList.remove('active')); this.parentElement.classList.toggle('active')">
+                        <span>ADR 4: Estrategia de Comunicación en Tiempo Real</span>
+                        <span class="badge-status">Aceptada</span>
+                    </div>
+                    <div class="adr-content">
+                        <div class="adr-content-grid">
+                            <!-- Left Col: Context & Decision -->
+                            <div>
+                                <div class="adr-box adr-box-context">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        Contexto y Requisito
+                                    </div>
+                                    <div class="adr-value">
+                                        El departamento de seguridad requiere enterarse inmediatamente de anomalías graves de fraude en marcación de asistencia sin saturar la red con consultas repetitivas de refresco de datos.
+                                    </div>
+                                </div>
+                                <div class="adr-box adr-box-decision">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                        Decisión Adoptada
+                                    </div>
+                                    <div class="adr-value">
+                                        Habilitar comunicación bidireccional mediante **WebSockets y el protocolo STOMP** en Spring Boot. El backend publica los eventos directamente en el topic `/topic/anomalias` y los navegadores suscritos los reciben en milisegundos.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Consequences & Alternatives -->
+                            <div>
+                                <div class="adr-consequences-box">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        Consecuencias
+                                    </div>
+                                    <div class="consequence-subgrid">
+                                        <div class="consequence-card consequence-pro">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Ventajas (Pros)
+                                            </div>
+                                            Latencia casi nula de alertas en vivo, eliminación completa de tráfico de polling y menor sobrecarga de base de datos PostgreSQL.
+                                        </div>
+                                        <div class="consequence-card consequence-con">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                Desventajas (Cons)
+                                            </div>
+                                            Mayor uso de sockets TCP activos y memoria en el servidor (mitigado mediante dimensionamiento de contenedores de ECS).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:16px;" class="adr-box adr-box-alternatives">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/></svg>
+                                        Alternativas Consideradas
+                                    </div>
+                                    <div class="adr-value">
+                                        HTTP Short Polling (descartado por ineficiencia de red y sobrecarga de queries de base de datos) o Server-Sent Events (SSE).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADR 5 -->
+                <div class="adr-item">
+                    <div class="adr-header" onclick="document.querySelectorAll('.adr-item').forEach(el=>el.classList.remove('active')); this.parentElement.classList.toggle('active')">
+                        <span>ADR 5: Organización del Código (Monolito Modular)</span>
+                        <span class="badge-status">Aceptada</span>
+                    </div>
+                    <div class="adr-content">
+                        <div class="adr-content-grid">
+                            <!-- Left Col: Context & Decision -->
+                            <div>
+                                <div class="adr-box adr-box-context">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        Contexto y Requisito
+                                    </div>
+                                    <div class="adr-value">
+                                        Se requiere velocidad de desarrollo y despliegues ágiles manteniendo una infraestructura de nube económica, pero impidiendo que el código de la aplicación se vuelva caótico y acoplado.
+                                    </div>
+                                </div>
+                                <div class="adr-box adr-box-decision">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                                        Decisión Adoptada
+                                    </div>
+                                    <div class="adr-value">
+                                        Adoptar una arquitectura de **Monolito Modular** organizando el backend en un único repositorio con cuatro capas desacopladas con dependencias estrictas unidireccionales, empaquetadas en un único Docker ejecutable para ECS Fargate.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Col: Consequences & Alternatives -->
+                            <div>
+                                <div class="adr-consequences-box">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                                        Consecuencias
+                                    </div>
+                                    <div class="consequence-subgrid">
+                                        <div class="consequence-card consequence-pro">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Ventajas (Pros)
+                                            </div>
+                                            Costos operativos de nube muy bajos, compilación y despliegue simple (CI/CD rápido), transaccionalidad relacional nativa y refactorización a microservicios futura sencilla.
+                                        </div>
+                                        <div class="consequence-card consequence-con">
+                                            <div class="consequence-title">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                                Desventajas (Cons)
+                                            </div>
+                                            Punto único de falla físico (un fallo de memoria JVM afecta la disponibilidad de todo el backend).
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:16px;" class="adr-box adr-box-alternatives">
+                                    <div class="adr-box-title">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"/></svg>
+                                        Alternativas Consideradas
+                                    </div>
+                                    <div class="adr-value">
+                                        Microservicios independientes (descartados por alta complejidad operativa de red, latencia inter-servicio y necesidad de balanceadores y VPC PrivateLinks múltiples).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. ÁRBOL DE UTILIDAD Y ATAM -->
+        <section id="utilidad" class="section-panel">
+            <h2 class="section-title">8. Árbol de Utilidad y Análisis ATAM</h2>
+            
+            <p class="paragraph">
+                Esta sección define el **Árbol de Utilidad** del sistema, priorizando las metas de arquitectura de software frente a escenarios medibles, seguido de un **análisis ATAM rápido** sobre el escenario crítico de mayor prioridad (`ESC-02` - Throughput en Horas Pico):
+            </p>
+
+            <table class="utility-table">
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">Atributo de Calidad</th>
+                        <th style="width: 38%;">Sub-atributo / Escenario</th>
+                        <th style="width: 25%;">Medida de Respuesta</th>
+                        <th style="width: 15%;">Prioridad (I / D)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-perf">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                Rendimiento
+                            </span>
+                        </td>
+                        <td><strong>Latencia:</strong> Procesar registro de asistencia (con biometría y geocerca) en menos de 1.5 segundos.</td>
+                        <td>Tiempo de respuesta en endpoint <code>/asistencia</code> &lt; 1.5s.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-high"><span class="pill-label">I:</span> Alta</span>
+                                <span class="priority-pill priority-medium"><span class="pill-label">D:</span> Media</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-perf">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                Rendimiento
+                            </span>
+                        </td>
+                        <td><strong>Throughput:</strong> Soportar picos de entrada masivos en horas de ingreso laboral.</td>
+                        <td>Procesar 200 marcaciones/segundo concurrentes sin caídas.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-high"><span class="pill-label">I:</span> Alta</span>
+                                <span class="priority-pill priority-high"><span class="pill-label">D:</span> Alta</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-sec">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                Seguridad
+                            </span>
+                        </td>
+                        <td><strong>Integridad:</strong> Bloquear y notificar intentos de fraude por ubicación o biometría.</td>
+                        <td>Responder HTTP 400 y alertar vía SNS en &lt; 3 segundos.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-high"><span class="pill-label">I:</span> Alta</span>
+                                <span class="priority-pill priority-medium"><span class="pill-label">D:</span> Media</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-avail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Disponibilidad
+                            </span>
+                        </td>
+                        <td><strong>Tolerancia a fallos:</strong> Redirigir tráfico transparentemente si una ECS Task física se apaga.</td>
+                        <td>ALB rutea tráfico a zona de disponibilidad activa en &lt; 10s.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-high"><span class="pill-label">I:</span> Alta</span>
+                                <span class="priority-pill priority-low"><span class="pill-label">D:</span> Baja</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-avail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Disponibilidad
+                            </span>
+                        </td>
+                        <td><strong>Tolerancia a fallos:</strong> Failover automático de base de datos relacional.</td>
+                        <td>RDS conmuta a réplica espejo en otra AZ restableciendo JDBC en &lt; 60s.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-high"><span class="pill-label">I:</span> Alta</span>
+                                <span class="priority-pill priority-medium"><span class="pill-label">D:</span> Media</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="attribute-badge badge-mod">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                                Modificabilidad
+                            </span>
+                        </td>
+                        <td><strong>Extensibilidad:</strong> Reemplazar el proveedor de almacenamiento en la nube (S3 a Azure Blob).</td>
+                        <td>Esfuerzo de desarrollo &lt; 8 horas modificando un solo módulo.</td>
+                        <td>
+                            <div class="priority-container">
+                                <span class="priority-pill priority-medium"><span class="pill-label">I:</span> Media</span>
+                                <span class="priority-pill priority-low"><span class="pill-label">D:</span> Baja</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">Análisis ATAM (Escenario ESC-02: 200 marcaciones/segundo concurrentes)</h3>
+            <div class="atam-grid">
+                <!-- Enfoque -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">1. Enfoque Arquitectónico</h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        Utilización de **escalamiento horizontal stateless** a través de un Application Load Balancer y ECS Fargate. La CPU e I/O de red del servidor se protegen derivando el procesamiento y las llamadas de red externas (AWS SNS y WebSockets) a hilos asíncronos `@Async` separados.
+                    </p>
+                </div>
+
+                <!-- Puntos Sensibles -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">2. Puntos Sensibles</h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        La dimensión del pool de conexiones **HikariCP** de Spring (un pool muy pequeño bloquea los hilos de Tomcat y uno muy grande satura RDS PostgreSQL), el dimensionamiento de CPU/RAM asignado a las ECS Tasks para descifrar firmas JWT, y el tamaño de la cola de hilos de tareas `@Async`.
+                    </p>
+                </div>
+
+                <!-- Trade-offs -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">3. Trade-offs (Compromisos)</h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        Se sacrifica la **Eficiencia de Costos de AWS** al mantener infraestructura redundante y escalable Multi-AZ. También se compromete la **Consistencia Inmediata** de auditoría (el administrador web ve las alertas por fraude con consistencia eventual / retraso de 1 a 3 segundos) para proteger la velocidad de marcación.
+                    </p>
+                </div>
+
+                <!-- Riesgos y No-Riesgos -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">4. Riesgos & No-Riesgos</h4>
+                    <p class="paragraph" style="font-size:0.88rem; margin-bottom: 6px;">
+                        <strong style="color:var(--danger)">Riesgos (R):</strong> Goteras de conexión JDBC si un reporte mensual corre durante la hora pico en el RDS transaccional principal (`R-01`), y latencia añadida si la clave pública JWT se consulta síncronamente desde una API externa en cada request (`R-02`).
+                    </p>
+                    <p class="paragraph" style="font-size:0.88rem; margin-bottom: 0;">
+                        <strong style="color:var(--success)">No-Riesgos (NR):</strong> Validación de firmas JWT en la memoria de la JVM con claves precargadas (`NR-01`), y aislamiento completo de fallos del SDK de AWS SNS mediante el procesamiento asíncrono `@Async` (`NR-02`).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 9. MATRIZ DE TRAZABILIDAD -->
+        <section id="trazabilidad" class="section-panel">
+            <h2 class="section-title">9. Matriz de Trazabilidad Arquitectónica</h2>
+            
+            <p class="paragraph">
+                Esta sección presenta la **Matriz de Trazabilidad** que mapea el flujo de negocio crítico de <strong>Cálculo y Generación de la Pre-nómina Mensual</strong> a través de las cuatro dimensiones de diseño arquitectónico y físico del sistema:
+            </p>
+
+            <table class="utility-table" style="font-size: 0.88rem; width: 100%; border-collapse: separate;">
+                <thead>
+                    <tr>
+                        <th style="width: 20%; vertical-align: middle;">Paso de Negocio</th>
+                        <th style="width: 20%; vertical-align: middle;">1. Vista de Clases (Dominio)<br><a href="#clases" style="color: #bfdbfe; font-size: 0.72rem; text-decoration: underline; font-weight: 500;">[Ver Diagrama]</a></th>
+                        <th style="width: 20%; vertical-align: middle;">2. Vista de Secuencia (Flujo)<br><a href="#secuencia" style="color: #bfdbfe; font-size: 0.72rem; text-decoration: underline; font-weight: 500;">[Ver Diagrama]</a></th>
+                        <th style="width: 20%; vertical-align: middle;">3. Vista de Actividad / Concurrencia<br><a href="#actividades" style="color: #bfdbfe; font-size: 0.72rem; text-decoration: underline; font-weight: 500;">[Ver Diagrama]</a></th>
+                        <th style="width: 20%; vertical-align: middle;">4. Vista de Despliegue (AWS)<br><a href="#despliegue" style="color: #bfdbfe; font-size: 0.72rem; text-decoration: underline; font-weight: 500;">[Ver Diagrama]</a></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>1. Petición de Cálculo</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">El Administrador solicita generar la pre-nómina (mes/año) en el Panel Web.</small>
+                        </td>
+                        <td>
+                            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                <li style="margin-bottom: 4px;">• <code>Empresa</code> <small style="color: var(--text-muted)">(ID Tenant)</small></li>
+                                <li>• <code>Empleado</code> <small style="color: var(--text-muted)">(Admin)</small></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <code>AdminRrhhController.generarPrenomina(...)</code> recibe el payload JSON e invoca a <code>PrenominaServiceImpl</code>.
+                        </td>
+                        <td>
+                            El <strong>Hilo Principal (Tomcat HTTP Thread)</strong> recibe la llamada de forma síncrona y realiza la validación de permisos del token JWT.
+                        </td>
+                        <td>
+                            El <strong>Cliente (Panel Web)</strong> envía la petición HTTPS cruzando el **Internet Gateway** de AWS. El **ALB** distribuye el tráfico hacia una de las **ECS Tasks** (Task A/B).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>2. Desacoplamiento (Fork)</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">El sistema crea la tarea asíncrona en segundo plano para evitar fallos de timeout.</small>
+                        </td>
+                        <td>
+                            • <code>ReportePrenominaMensual</code> <small style="color: var(--text-muted)">(Instanciada con estado <code>PROCESANDO</code>)</small>
+                        </td>
+                        <td>
+                            <code>PrenominaServiceImpl</code> crea el registro inicial en base de datos y retorna la respuesta ID de inmediato al controlador.
+                        </td>
+                        <td>
+                            <strong>Bifurcación de hilos (Fork):</strong>
+                            <ul style="list-style: none; padding-left: 0; margin-top: 4px;">
+                                <li style="margin-bottom: 3px;">• Hilo HTTP retorna <code>202 Accepted</code>.</li>
+                                <li>• Hilo asíncrono <code>@Async</code> inicia el procesamiento batch.</li>
+                            </ul>
+                        </td>
+                        <td>
+                            La **ECS Task** finaliza la petición HTTP y libera el canal de red. **RDS PostgreSQL** persiste el cambio de estado del reporte a <code>PROCESANDO</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>3. Extracción de Datos</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">El motor asíncrono lee registros de asistencia y contratos del mes.</small>
+                        </td>
+                        <td>
+                            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                <li style="margin-bottom: 4px;">• <code>Empleado</code> <small style="color: var(--text-muted)">(Lista de activos)</small></li>
+                                <li>• <code>RegistroAsistencia</code> <small style="color: var(--text-muted)">(Marcaciones)</small></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <code>PrenominaServiceImpl</code> consulta los repositorios <code>EmpleadoRepository</code> y <code>RegistroAsistenciaRepository</code> de JPA.
+                        </td>
+                        <td>
+                            El **Hilo <code>@Async</code>** realiza la lectura paginada de los datos históricos de asistencia para proteger la memoria RAM del contenedor Fargate.
+                        </td>
+                        <td>
+                            La tarea de **ECS Fargate** ejecuta las consultas SQL pesadas mediante conexiones JDBC directas sobre la base de datos **RDS PostgreSQL Primary**.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>4. Cálculo Salarial</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">El servicio calcula horas trabajadas, extras, recargos y ausencias.</small>
+                        </td>
+                        <td>
+                            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                <li style="margin-bottom: 4px;">• <code>ContratosEmpleados</code></li>
+                                <li>• <code>CalculadoraPrenominaService</code></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <code>CalculadoraPrenominaService.calcular(...)</code> aplica las fórmulas matemáticas y reglas salariales por cada empleado.
+                        </td>
+                        <td>
+                            El **Hilo <code>@Async</code>** ejecuta la computación matemática en memoria RAM y CPU aislada.
+                        </td>
+                        <td>
+                            Uso intensivo de recursos de CPU y memoria JVM dedicados dentro de la instancia de contenedor virtual de **ECS Task**.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>5. Guardado de Reporte</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">Consolidación del archivo CSV inmutable y actualización en base de datos.</small>
+                        </td>
+                        <td>
+                            • <code>ReportePrenominaMensual</code> <small style="color: var(--text-muted)">(Se completa la URL de S3, totales y montos)</small>
+                        </td>
+                        <td>
+                            <code>DocumentoExportService</code> escribe el archivo físico y sube a AWS S3. Guarda la entidad actualizada mediante <code>ReporteRepository.save(...)</code>.
+                        </td>
+                        <td>
+                            El **Hilo <code>@Async</code>** escribe en el almacenamiento efímero temporal y luego transmite el archivo mediante I/O de red hacia S3.
+                        </td>
+                        <td>
+                            La **ECS Task** sube el CSV físico al bucket de **Amazon S3** (<code>cloudtime-media-storage-dev</code>) y actualiza el estado a <code>COMPLETO</code> en **RDS PostgreSQL**.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>6. Notificación Final</strong><br>
+                            <small style="color: var(--text-muted); display: block; margin-top: 4px; line-height: 1.3;">Alerta por correo, push y actualización en tiempo real en los paneles.</small>
+                        </td>
+                        <td>
+                            <ul style="list-style: none; padding-left: 0; margin: 0;">
+                                <li style="margin-bottom: 4px;">• <code>AlertaService</code></li>
+                                <li>• <code>AnomaliasGravesAuditoria</code></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <code>AlertaService.publicarEventoFinalizacion(...)</code> publica en AWS SNS y gatilla notificaciones WebSockets.
+                        </td>
+                        <td>
+                            El **Hilo <code>@Async</code>** envía tramas WebSocket y notifica al broker de mensajería antes de realizar el **Join** y finalizar su ciclo de vida.
+                        </td>
+                        <td>
+                            La **ECS Task** publica un evento mediante SDK en **Amazon SNS** (<code>cloudtime-business-events-dev</code>) para alertas por SMS o e-mail.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title" style="margin-top: 40px; margin-bottom: 20px;">🗣️ Guía de Explicación Multidimensional (Sustentación de Flujo)</h3>
+            
+            <div class="atam-grid">
+                <!-- Dimensión de Negocio -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: var(--accent-secondary);"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                        1. Vista de Clases: Dominio de Datos
+                    </h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        El motor de cálculo opera sobre entidades de negocio bien estructuradas. Utiliza la relación multi-tenant de <code>Empresa</code> para aislar y recuperar la lista de <code>Empleado</code>. Examina recursivamente cada <code>RegistroAsistencia</code> y lo contrasta con el salario y jornada definidos en <code>ContratosEmpleados</code>, consolidando la información final en un registro inmutable de <code>ReportePrenominaMensual</code>.
+                    </p>
+                </div>
+
+                <!-- Dimensión de Flujo API -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: var(--accent-secondary);"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>
+                        2. Vista de Secuencia: Comportamiento API
+                    </h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        La interacción se ejecuta de manera estructurada y limpia. La API REST expone el endpoint en <code>AdminRrhhController</code>, el cual delega la orquestación a <code>PrenominaServiceImpl</code>. Este servicio coordina los accesos a datos mediante Repositorios JPA y delega la ejecución de la matemática salarial al procesador puro de negocio: <code>CalculadoraPrenominaService</code>.
+                    </p>
+                </div>
+
+                <!-- Dimensión de Concurrencia -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: var(--accent-secondary);"><path d="M6 3v12"/><path d="M18 3v12"/><path d="M6 15a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3"/><path d="M12 18v3"/></svg>
+                        3. Vista de Actividad: Concurrencia y Rendimiento
+                    </h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        Para mitigar los temidos fallos de timeout de red (donde peticiones largas de más de 30s son interrumpidas con un error **HTTP 504 Gateway Timeout** por el ALB de AWS), el backend realiza una bifurcación de hilos (Fork/Join). El controlador HTTP Tomcat delega de inmediato el cálculo a un hilo secundario asíncrono gestionado mediante <code>@Async</code> de Spring Boot, liberando el hilo web y retornando de inmediato un <code>HTTP 202 Accepted</code> para asegurar una interfaz fluida.
+                    </p>
+                </div>
+
+                <!-- Dimensión Física -->
+                <div class="atam-card">
+                    <h4 class="atam-card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; color: var(--accent-secondary);"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8" y2="21"/><line x1="12" y1="16" x2="12" y2="21"/><line x1="16" y1="16" x2="16" y2="21"/></svg>
+                        4. Vista de Despliegue: Infraestructura AWS
+                    </h4>
+                    <p class="paragraph" style="font-size:0.92rem; margin-bottom:0;">
+                        A nivel de infraestructura física, el tráfico HTTPS es ruteado por el **Application Load Balancer (ALB)** a las tareas stateless de **ECS Fargate** en subredes privadas. La base de datos es una instancia **RDS PostgreSQL Multi-AZ**. Los archivos masivos CSV resultantes se suben a **Amazon S3** para descarga a largo plazo, y el aviso final de generación exitosa se distribuye asíncronamente mediante **Amazon SNS**.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Caja de Advertencia de Timeout -->
+            <div class="custom-alert" style="margin-top: 24px;">
+                <div class="custom-alert-title">💡 Patrón Arquitectónico de Asincronía para Procesamiento Batch</div>
+                Este diseño multi-vista demuestra cómo la asincronía a nivel de código (Vista de Actividad) se comunica directamente con la persistencia inmutable en AWS S3 y RDS (Vista de Despliegue), protegiendo la disponibilidad de hilos de Tomcat y eliminando la posibilidad de caídas de conexión por latencia en el ALB de AWS.
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script triggers -->
+    <script>
+        // Init Mermaid for light/neutral backgrounds
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false, htmlLabels: true }
+        });
+
+        // Simple navigation active state highlights on scroll
+        window.addEventListener('scroll', () => {
+            let currentSection = '';
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.pageYOffset >= sectionTop) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.menu-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
